@@ -1,0 +1,278 @@
+// Esquema de base de datos - SaaS de Agendamiento + Publicidad
+// Modelo multi-tenant: cada "Business" es un negocio cliente independiente
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// TENANTS Y USUARIOS
+// ============================================
+
+model Business {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique // usado en la URL pública: /b/mi-negocio
+  timezone    String   @default("America/Bogota")
+  logoUrl     String?
+  address     String?  // usado por el chatbot para responder "¿dónde quedan?"
+  description String?  // contexto libre que el chatbot usa para responder preguntas generales
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  users       BusinessUser[]
+  services    Service[]
+  staff       Staff[]
+  customers   Customer[]
+  whatsappConversations WhatsAppConversation[]
+  appointments Appointment[]
+  socialAccounts SocialAccount[]
+  adCampaigns AdCampaign[]
+
+  @@index([slug])
+}
+
+// Usuario que administra un negocio (dueño, staff con acceso al panel)
+model BusinessUser {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  email      String
+  passwordHash String
+  role       BusinessRole @default(STAFF)
+  createdAt  DateTime @default(now())
+
+  @@unique([businessId, email])
+}
+
+enum BusinessRole {
+  OWNER
+  ADMIN
+  STAFF
+}
+
+// ============================================
+// AGENDAMIENTO
+// ============================================
+
+model Service {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  durationMin Int      // duración en minutos
+  price       Decimal? @db.Decimal(10, 2)
+  active      Boolean  @default(true)
+
+  appointments Appointment[]
+  staffServices StaffService[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Staff {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name       String
+  email      String?
+  active     Boolean  @default(true)
+
+  availability StaffAvailability[]
+  staffServices StaffService[]
+  appointments Appointment[]
+
+  createdAt  DateTime @default(now())
+}
+
+// Qué servicios puede atender cada miembro del staff
+model StaffService {
+  id        String  @id @default(cuid())
+  staffId   String
+  staff     Staff   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, serviceId])
+}
+
+// Horario recurrente disponible por día de la semana
+model StaffAvailability {
+  id        String @id @default(cuid())
+  staffId   String
+  staff     Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  dayOfWeek Int    // 0 = domingo ... 6 = sábado
+  startTime String // "09:00"
+  endTime   String // "17:00"
+}
+
+model Customer {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name       String
+  email      String?
+  phone      String?
+
+  appointments Appointment[]
+  createdAt  DateTime @default(now())
+
+  @@index([businessId, phone])
+}
+
+model Appointment {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id])
+  staffId    String
+  staff      Staff    @relation(fields: [staffId], references: [id])
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  startTime  DateTime
+  endTime    DateTime
+  status     AppointmentStatus @default(CONFIRMED)
+  notes      String?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([businessId, startTime])
+  @@index([staffId, startTime])
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+// ============================================
+// PUBLICIDAD / REDES SOCIALES
+// ============================================
+
+// Cuenta conectada de una red social (token de Meta/TikTok por negocio)
+model SocialAccount {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  platform      SocialPlatform
+  accountId     String   // ID de la cuenta en la plataforma externa
+  accessToken   String   // cifrado en la capa de aplicación, nunca en texto plano
+  refreshToken  String?
+  tokenExpiresAt DateTime?
+  connected     Boolean  @default(true)
+
+  campaigns     AdCampaign[]
+  createdAt     DateTime @default(now())
+
+  @@unique([businessId, platform, accountId])
+}
+
+enum SocialPlatform {
+  META_FACEBOOK
+  META_INSTAGRAM
+  TIKTOK
+  WHATSAPP
+}
+
+model AdCampaign {
+  id              String   @id @default(cuid())
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  socialAccountId String
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id])
+
+  name            String
+  status          CampaignStatus @default(DRAFT)
+  budget          Decimal? @db.Decimal(10, 2)
+  objective       String?  // ej: "traffic", "conversions", "brand_awareness"
+
+  creatives       AdCreative[]
+
+  externalCampaignId String? // ID que devuelve la API de Meta/TikTok una vez publicada
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum CampaignStatus {
+  DRAFT
+  GENERATING
+  READY
+  PUBLISHED
+  PAUSED
+  FAILED
+}
+
+// Cada pieza creativa generada (texto + imagen/video) dentro de una campaña
+model AdCreative {
+  id           String   @id @default(cuid())
+  campaignId   String
+  campaign     AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  headline     String?
+  bodyText     String?
+  callToAction String?
+  mediaType    MediaType
+  mediaUrl     String?  // URL del archivo generado (imagen o video), almacenado en storage externo
+  mediaPrompt  String?  // prompt usado para generar la imagen/video, para trazabilidad
+
+  externalAdId String?  // ID del anuncio ya publicado en la plataforma
+  status       CreativeStatus @default(PENDING)
+
+  createdAt    DateTime @default(now())
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum CreativeStatus {
+  PENDING
+  GENERATED
+  PUBLISHED
+  FAILED
+}
+
+// ============================================
+// CHATBOT DE WHATSAPP
+// ============================================
+
+// Guarda en qué paso va cada conversación (una por cliente por negocio),
+// para que el bot recuerde el contexto entre un mensaje y el siguiente
+// aunque pasen minutos u horas entre ellos.
+model WhatsAppConversation {
+  id           String   @id @default(cuid())
+  businessId   String
+  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customerPhone String  // en formato internacional, ej: "573001234567"
+
+  state        ConversationState @default(IDLE)
+  context      Json     @default("{}") // guarda serviceId elegido, fecha, slot, etc. mientras dura el flujo
+
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+
+  @@unique([businessId, customerPhone])
+}
+
+enum ConversationState {
+  IDLE                  // sin flujo activo, esperando que el cliente diga qué quiere
+  AWAITING_SERVICE      // el bot mostró servicios y espera que el cliente elija uno
+  AWAITING_DATE         // esperando que el cliente diga qué día quiere
+  AWAITING_TIME         // el bot mostró horarios y espera que elija uno
+  AWAITING_NAME         // esperando el nombre para completar la cita
+  AWAITING_CANCEL_CHOICE // el bot mostró las citas próximas y espera cuál cancelar
+}
