@@ -16,6 +16,8 @@ interface Slot {
   end: string;
   staffId: string;
   staffName: string;
+  isFull: boolean;
+  spotsLeft: number;
 }
 
 export default function BookingPage() {
@@ -249,16 +251,30 @@ export default function BookingPage() {
               {slots.map((slot) => {
                 const active =
                   selectedSlot?.start === slot.start && selectedSlot?.staffId === slot.staffId;
+                const label = new Date(slot.start).toLocaleTimeString("es-CO", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+                if (slot.isFull) {
+                  return (
+                    <button
+                      key={`${slot.staffId}-${slot.start}`}
+                      disabled
+                      className="cw-time cw-time-full"
+                      title="Este horario ya no tiene cupo disponible"
+                    >
+                      {label}
+                      <span className="cw-time-full-label">Cupo lleno</span>
+                    </button>
+                  );
+                }
                 return (
                   <button
                     key={`${slot.staffId}-${slot.start}`}
                     onClick={() => setSelectedSlot(slot)}
                     className={`cw-time ${active ? "active" : ""}`}
                   >
-                    {new Date(slot.start).toLocaleTimeString("es-CO", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {label}
                   </button>
                 );
               })}

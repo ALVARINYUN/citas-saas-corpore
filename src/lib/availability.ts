@@ -5,6 +5,8 @@ interface TimeSlot {
   end: Date;
   staffId: string;
   staffName: string;
+  isFull: boolean;
+  spotsLeft: number;
 }
 
 /**
@@ -55,14 +57,22 @@ function zonedTimeToUtc(
 }
 
 /**
- * Calcula los horarios disponibles para un servicio en una fecha dada,
- * revisando la disponibilidad recurrente de cada miembro del staff
- * y descartando los espacios que chocan con citas ya confirmadas.
+ * Calcula los horarios de un servicio en una fecha dada, revisando la
+ * disponibilidad recurrente de cada miembro del staff. Cada horario se
+ * devuelve SIEMPRE (no se oculta al llenarse) junto con `isFull`/`spotsLeft`,
+ * para que quien lo muestre decida si lo deshabilita o no.
  *
  * `dateStr` es la fecha calendario ("YYYY-MM-DD") tal como la eligió el
  * cliente, y `timeZone` es business.timezone: todas las horas de
  * disponibilidad (StaffAvailability.startTime/endTime) se interpretan en
  * esa zona, no en la del servidor donde corre el código.
+ *
+ * El cupo (Service.capacity) permite que un mismo horario reciba más de una
+ * reserva (ej: una clase grupal). Para servicios individuales (capacity=1)
+ * se ofrecen horarios cada 15 minutos, como antes. Para servicios con cupo
+ * >1 se ofrecen horarios fijos separados por la duración completa del
+ * servicio (no tendría sentido ofrecer una clase grupal de 60 min a las
+ * 9:00 y también a las 9:15).
  */
 export async function getAvailableSlots(
   businessId: string,
@@ -97,17 +107,21 @@ export async function getAvailableSlots(
   const dayStart = zonedTimeToUtc(year, month, day, 0, 0, timeZone);
   const dayEnd = zonedTimeToUtc(year, month, day, 23, 59, timeZone);
 
-  // Citas ya existentes ese día, para descartar solapamientos
+  // Citas ya existentes ese día para ESTE servicio, para contar cupos
+  // ocupados por horario exacto de inicio.
   const existingAppointments = await prisma.appointment.findMany({
     where: {
       businessId,
+      serviceId,
       status: { not: "CANCELLED" },
       startTime: { gte: dayStart, lte: dayEnd },
     },
   });
 
+  const capacity = service.capacity;
+  const stepMinutes = capacity > 1 ? service.durationMin : 15;
+
   const slots: TimeSlot[] = [];
-  const stepMinutes = 15; // granularidad de los horarios ofrecidos
 
   for (const staff of eligibleStaff) {
     for (const window of staff.availability) {
@@ -123,19 +137,20 @@ export async function getAvailableSlots(
         const slotStart = new Date(cursor);
         const slotEnd = new Date(cursor.getTime() + service.durationMin * 60000);
 
-        const overlaps = existingAppointments.some(
-          (appt) =>
-            appt.staffId === staff.id &&
-            slotStart < appt.endTime &&
-            slotEnd > appt.startTime
-        );
+        if (slotStart > new Date()) {
+          const bookedCount = existingAppointments.filter(
+            (appt) =>
+              appt.staffId === staff.id && appt.startTime.getTime() === slotStart.getTime()
+          ).length;
+          const spotsLeft = Math.max(0, capacity - bookedCount);
 
-        if (!overlaps && slotStart > new Date()) {
           slots.push({
             start: slotStart,
             end: slotEnd,
             staffId: staff.id,
             staffName: staff.name,
+            isFull: spotsLeft <= 0,
+            spotsLeft,
           });
         }
 

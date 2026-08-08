@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   const session = await requireSession();
   if (!isSession(session)) return session;
 
-  const { name, durationMin, price, description } = await req.json();
+  const { name, durationMin, price, description, capacity } = await req.json();
   if (!name || !durationMin) {
     return NextResponse.json({ error: "Nombre y duración son obligatorios" }, { status: 400 });
   }
@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
       durationMin: Number(durationMin),
       price: price ? Number(price) : null,
       description: description || null,
+      capacity: capacity ? Math.max(1, Number(capacity)) : 1,
     },
   });
   return NextResponse.json({ service }, { status: 201 });

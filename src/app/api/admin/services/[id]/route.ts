@@ -26,6 +26,7 @@ export async function PATCH(
       durationMin: body.durationMin ? Number(body.durationMin) : undefined,
       price: body.price !== undefined ? (body.price ? Number(body.price) : null) : undefined,
       description: body.description ?? undefined,
+      capacity: body.capacity !== undefined ? Math.max(1, Number(body.capacity)) : undefined,
       active: body.active ?? undefined,
     },
   });

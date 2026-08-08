@@ -262,6 +262,30 @@ body {
   box-shadow: 0 8px 18px rgba(30, 78, 95, 0.16);
 }
 
+.cw-time-full {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-color: rgba(190, 183, 170, 0.5);
+  background: rgba(190, 183, 170, 0.12);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.cw-time-full:hover {
+  transform: none;
+  background: rgba(190, 183, 170, 0.12);
+}
+
+.cw-time-full-label {
+  font-family: var(--font-body), sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .cw-fields {
   display: grid;
   gap: 12px;

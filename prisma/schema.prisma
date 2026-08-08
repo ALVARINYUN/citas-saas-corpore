@@ -69,6 +69,7 @@ model Service {
   description String?
   durationMin Int      // duración en minutos
   price       Decimal? @db.Decimal(10, 2)
+  capacity    Int      @default(1) // cupos por horario: 1 = cita individual, >1 = grupal/varios recursos
   active      Boolean  @default(true)
 
   appointments Appointment[]

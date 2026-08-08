@@ -184,11 +184,14 @@ async function handleDateSelection(
   const dateStr = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
   const slots = await getAvailableSlots(businessId, context.serviceId!, dateStr, business.timezone);
+  // Por WhatsApp solo tiene sentido ofrecer como opción numerada los
+  // horarios que todavía tienen cupo -- uno lleno no se puede "elegir".
+  const available = slots.filter((s) => !s.isFull);
 
-  if (slots.length === 0) {
+  if (available.length === 0) {
     return "No hay horarios disponibles ese día. ¿Quieres intentar con otra fecha?";
   }
-  const options = slots.slice(0, 8);
+  const options = available.slice(0, 8);
 
   await setState(businessId, phone, "AWAITING_TIME", {
     ...context,

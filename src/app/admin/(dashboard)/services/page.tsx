@@ -7,13 +7,14 @@ interface Service {
   name: string;
   durationMin: number;
   price: string | null;
+  capacity: number;
   active: boolean;
 }
 
 export default function ServicesAdminPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: "", durationMin: "30", price: "" });
+  const [form, setForm] = useState({ name: "", durationMin: "30", price: "", capacity: "1" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,7 +43,7 @@ export default function ServicesAdminPage() {
         setError(data.error ?? "No se pudo crear el servicio");
         return;
       }
-      setForm({ name: "", durationMin: "30", price: "" });
+      setForm({ name: "", durationMin: "30", price: "", capacity: "1" });
       load();
     } finally {
       setSaving(false);
@@ -94,6 +95,20 @@ export default function ServicesAdminPage() {
               onChange={(e) => setForm({ ...form, price: e.target.value })}
             />
           </div>
+          <div>
+            <input
+              className="cw-input"
+              placeholder="Cupo por horario"
+              type="number"
+              min={1}
+              value={form.capacity}
+              onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+              required
+            />
+            <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>
+              1 = cita individual, más de 1 = varias personas o recursos por el mismo horario
+            </p>
+          </div>
         </div>
         {error && <p style={{ color: "#b91c1c", fontSize: 12 }}>{error}</p>}
         <button type="submit" disabled={saving} className="cw-btn-primary">
@@ -128,6 +143,7 @@ export default function ServicesAdminPage() {
               </div>
               <div style={{ fontSize: 12, color: "var(--muted)" }}>
                 {s.durationMin} min {s.price ? `· $${s.price}` : ""}
+                {s.capacity > 1 ? ` · cupo ${s.capacity}` : ""}
               </div>
             </div>
             <div style={{ display: "flex", gap: 12 }}>
