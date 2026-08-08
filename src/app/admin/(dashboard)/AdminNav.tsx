@@ -4,6 +4,20 @@ import { usePathname } from "next/navigation";
 
 const LINKS = [
   {
+    href: "/admin/business",
+    label: "Mi negocio",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 21V6a1 1 0 011-1h10a1 1 0 011 1v15M9 9h.01M13 9h.01M9 13h.01M13 13h.01M9 17h.01M13 17h.01M16 21h4V11h-4"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
     href: "/admin/services",
     label: "Servicios",
     icon: (

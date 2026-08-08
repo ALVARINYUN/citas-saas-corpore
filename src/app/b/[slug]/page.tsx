@@ -23,6 +23,7 @@ export default function BookingPage() {
 
   const [businessId, setBusinessId] = useState("");
   const [businessName, setBusinessName] = useState("");
+  const [businessLogo, setBusinessLogo] = useState<string | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -44,6 +45,7 @@ export default function BookingPage() {
         }
         setBusinessId(data.business.id);
         setBusinessName(data.business.name);
+        setBusinessLogo(data.business.logoUrl ?? null);
         setServices(data.services);
       });
   }, [slug]);
@@ -136,15 +138,24 @@ export default function BookingPage() {
       <div className="cw-booking">
         {/* LOGO */}
         <header className="cw-brand">
-          <svg className="cw-brand-symbol" viewBox="0 0 220 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M10 40 C48 3, 76 6, 106 31 C138 57, 171 53, 207 22"
-              stroke="#8FA98C"
-              strokeWidth="3.2"
-              strokeLinecap="round"
+          {businessLogo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={businessLogo}
+              alt={businessName}
+              style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", margin: "0 auto 12px", display: "block" }}
             />
-            <circle cx="166" cy="25" r="7" fill="#8FA98C" />
-          </svg>
+          ) : (
+            <svg className="cw-brand-symbol" viewBox="0 0 220 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M10 40 C48 3, 76 6, 106 31 C138 57, 171 53, 207 22"
+                stroke="#8FA98C"
+                strokeWidth="3.2"
+                strokeLinecap="round"
+              />
+              <circle cx="166" cy="25" r="7" fill="#8FA98C" />
+            </svg>
+          )}
           <div className="cw-brand-name">{businessName || "Cargando..."}</div>
           <div className="cw-brand-tagline">Reserva tu cita</div>
         </header>

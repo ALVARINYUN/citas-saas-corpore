@@ -21,6 +21,7 @@ model Business {
   logoUrl     String?
   address     String?  // usado por el chatbot para responder "¿dónde quedan?"
   description String?  // contexto libre que el chatbot usa para responder preguntas generales
+  active      Boolean  @default(true) // el super-admin puede desactivarlo sin borrar sus datos
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

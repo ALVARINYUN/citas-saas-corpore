@@ -14,10 +14,20 @@ export async function POST(req: NextRequest) {
   // globalmente. Si en el futuro una misma persona administra varios
   // negocios con el mismo correo, aquí habría que dejarle elegir cuál.
   // Por ahora se toma la primera coincidencia.
-  const user = await prisma.businessUser.findFirst({ where: { email } });
+  const user = await prisma.businessUser.findFirst({
+    where: { email },
+    include: { business: true },
+  });
 
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     return NextResponse.json({ error: "Correo o contraseña incorrectos" }, { status: 401 });
+  }
+
+  if (!user.business.active) {
+    return NextResponse.json(
+      { error: "Este negocio fue desactivado. Contacta al soporte de la plataforma." },
+      { status: 403 }
+    );
   }
 
   const token = await createSessionToken({
