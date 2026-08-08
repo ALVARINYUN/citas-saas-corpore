@@ -40,3 +40,16 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ business });
 }
+
+/** Quita el logo — el negocio vuelve a mostrar solo su nombre con el símbolo decorativo genérico. */
+export async function DELETE() {
+  const session = await requireSession();
+  if (!isSession(session)) return session;
+
+  const business = await prisma.business.update({
+    where: { id: session.businessId },
+    data: { logoUrl: null },
+  });
+
+  return NextResponse.json({ business });
+}
