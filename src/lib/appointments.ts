@@ -29,19 +29,35 @@ export async function createAppointment(input: CreateAppointmentInput) {
   const endTime = new Date(startTime.getTime() + service.durationMin * 60000);
 
   return prisma.$transaction(async (tx) => {
-    // El cupo (Service.capacity) permite que un mismo horario reciba más de
-    // una reserva (ej: una clase grupal) -- ya no basta con que exista OTRA
-    // cita en ese horario para rechazarla, hay que contar cuántas hay y
-    // compararlo contra el cupo del servicio.
-    const bookedCount = await tx.appointment.count({
-      where: {
-        staffId,
-        serviceId,
-        status: { not: "CANCELLED" },
-        startTime,
-      },
-    });
-    if (bookedCount >= service.capacity) throw new SlotTakenError();
+    if (service.capacity <= 1) {
+      // Servicio individual: cualquier cita del staff (de cualquier
+      // servicio) que se solape en el tiempo lo bloquea -- el profesional
+      // no puede estar en dos citas que se crucen, aunque no empiecen a
+      // la misma hora exacta (ej: un servicio de 50 min a las 9:00 choca
+      // con uno que arranque a las 9:15).
+      const conflict = await tx.appointment.findFirst({
+        where: {
+          staffId,
+          status: { not: "CANCELLED" },
+          startTime: { lt: endTime },
+          endTime: { gt: startTime },
+        },
+      });
+      if (conflict) throw new SlotTakenError();
+    } else {
+      // Servicio con cupo (ej: clase grupal): se cuentan las citas de este
+      // mismo staff+servicio+hora exacta de inicio, y se compara contra
+      // el cupo.
+      const bookedCount = await tx.appointment.count({
+        where: {
+          staffId,
+          serviceId,
+          status: { not: "CANCELLED" },
+          startTime,
+        },
+      });
+      if (bookedCount >= service.capacity) throw new SlotTakenError();
+    }
 
     let customerRecord = customer.phone
       ? await tx.customer.findFirst({ where: { businessId, phone: customer.phone } })

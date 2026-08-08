@@ -107,12 +107,13 @@ export async function getAvailableSlots(
   const dayStart = zonedTimeToUtc(year, month, day, 0, 0, timeZone);
   const dayEnd = zonedTimeToUtc(year, month, day, 23, 59, timeZone);
 
-  // Citas ya existentes ese día para ESTE servicio, para contar cupos
-  // ocupados por horario exacto de inicio.
+  // Citas ya existentes ese día para ESTE staff (de cualquier servicio):
+  // para servicios individuales, cualquiera de ellas puede bloquear un
+  // horario por solaparse en el tiempo, sin importar de qué servicio sea
+  // (el profesional solo puede estar en un lado a la vez).
   const existingAppointments = await prisma.appointment.findMany({
     where: {
       businessId,
-      serviceId,
       status: { not: "CANCELLED" },
       startTime: { gte: dayStart, lte: dayEnd },
     },
@@ -138,11 +139,29 @@ export async function getAvailableSlots(
         const slotEnd = new Date(cursor.getTime() + service.durationMin * 60000);
 
         if (slotStart > new Date()) {
-          const bookedCount = existingAppointments.filter(
-            (appt) =>
-              appt.staffId === staff.id && appt.startTime.getTime() === slotStart.getTime()
-          ).length;
-          const spotsLeft = Math.max(0, capacity - bookedCount);
+          let spotsLeft: number;
+
+          if (capacity <= 1) {
+            // Servicio individual: cualquier cita del staff (de cualquier
+            // servicio) que se solape con este horario lo bloquea del todo.
+            const hasOverlap = existingAppointments.some(
+              (appt) =>
+                appt.staffId === staff.id &&
+                slotStart < appt.endTime &&
+                slotEnd > appt.startTime
+            );
+            spotsLeft = hasOverlap ? 0 : 1;
+          } else {
+            // Servicio con cupo (ej: clase grupal): se cuentan las citas
+            // de este mismo servicio que empiecen EXACTAMENTE a esta hora.
+            const bookedCount = existingAppointments.filter(
+              (appt) =>
+                appt.staffId === staff.id &&
+                appt.serviceId === serviceId &&
+                appt.startTime.getTime() === slotStart.getTime()
+            ).length;
+            spotsLeft = Math.max(0, capacity - bookedCount);
+          }
 
           slots.push({
             start: slotStart,
