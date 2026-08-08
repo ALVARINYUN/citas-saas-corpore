@@ -172,13 +172,22 @@ async function handleDateSelection(
     return 'No entendí la fecha. Escríbela como "mañana" o en formato AAAA-MM-DD, por ejemplo 2026-08-15.';
   }
 
-  const slots = await getAvailableSlots(businessId, context.serviceId!, date);
+  const business = await prisma.business.findUnique({ where: { id: businessId } });
+  if (!business) {
+    return "No encontré este negocio. Intenta de nuevo más tarde.";
+  }
+
+  // Usamos los getters locales (no toISOString, que es UTC) porque `date`
+  // se construyó con las mismas componentes año/mes/día que el cliente
+  // escribió, sin importar la zona del servidor.
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const dateStr = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
+  const slots = await getAvailableSlots(businessId, context.serviceId!, dateStr, business.timezone);
 
   if (slots.length === 0) {
     return "No hay horarios disponibles ese día. ¿Quieres intentar con otra fecha?";
   }
-
-  const dateStr = date.toISOString().slice(0, 10);
   const options = slots.slice(0, 8);
 
   await setState(businessId, phone, "AWAITING_TIME", {

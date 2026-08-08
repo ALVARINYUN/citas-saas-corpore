@@ -23,8 +23,7 @@ export async function GET(
     return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
   }
 
-  const date = new Date(`${dateParam}T00:00:00`);
-  const slots = await getAvailableSlots(business.id, serviceId, date);
+  const slots = await getAvailableSlots(business.id, serviceId, dateParam, business.timezone);
 
   return NextResponse.json({ slots });
 }
