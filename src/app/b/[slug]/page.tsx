@@ -347,36 +347,67 @@ export default function BookingPage() {
   return (
     <main className="cw-pb-page">
       <div className={`cw-pb-shell ${currentStep >= 2 ? "has-fixed-bar" : ""}`}>
-        <header className="cw-pb-header">
-          <div className="cw-pb-brand">
+        <header className="cw-pb-hero">
+          <div className="cw-pb-logo-wrapper">
             {business?.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={business.logoUrl} alt={business.name} className="cw-pb-logo-img" />
+              <img src={business.logoUrl} alt={business.name} className="cw-pb-logo-img corpore-logo" />
             ) : (
-              <svg className="cw-pb-logo-mark" viewBox="0 0 220 60" fill="none" aria-hidden="true">
-                <path
-                  d="M10 40 C48 3, 76 6, 106 31 C138 57, 171 53, 207 22"
-                  stroke="#8FA98C"
-                  strokeWidth="3.2"
-                  strokeLinecap="round"
-                />
-                <circle cx="166" cy="25" r="7" fill="#8FA98C" />
-              </svg>
+              <div className="cw-pb-logo-block">
+                <svg className="cw-pb-logo-symbol" viewBox="0 0 220 60" fill="none" aria-hidden="true">
+                  <path
+                    d="M10 40 C48 3, 76 6, 106 31 C138 57, 171 53, 207 22"
+                    stroke="#6F866B"
+                    strokeWidth="3.4"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="166" cy="25" r="7" fill="#6F866B" />
+                </svg>
+                <div className="cw-pb-logo-name">{business?.name ?? "Corpore"}</div>
+                <div className="cw-pb-logo-sub">Pilates</div>
+              </div>
             )}
-            <div>
-              <div className="cw-pb-brand-name">{business?.name ?? "Cargando…"}</div>
-              <div className="cw-pb-brand-tagline">Pilates · Fisioterapia</div>
+          </div>
+
+          <div className="cw-pb-hero-container">
+            <div className="cw-pb-hero-content">
+              <div className="cw-pb-hero-copy">
+                <p className="cw-pb-eyebrow">Reservas en línea</p>
+                <h1 className="cw-pb-title">Reserva tu cita</h1>
+                <p className="cw-pb-intro-text">
+                  Selecciona el servicio que necesitas. En el siguiente paso podrás elegir la fecha y el horario.
+                </p>
+              </div>
+
+              <div className="cw-pb-hero-visual" aria-hidden="true">
+                <svg viewBox="0 0 380 300" fill="none">
+                  <path
+                    d="M30,150 C30,75 105,25 190,38 C285,52 350,112 338,196 C326,278 228,300 145,278 C58,256 30,222 30,150 Z"
+                    fill="#8FA98C"
+                    opacity="0.07"
+                  />
+                  <rect x="86" y="66" width="204" height="172" rx="18" stroke="#6F866B" strokeWidth="2.5" opacity="0.5" />
+                  <path d="M86 118 H290" stroke="#6F866B" strokeWidth="2.5" opacity="0.5" />
+                  <path d="M138 50 V82 M238 50 V82" stroke="#6F866B" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
+                  <circle cx="138" cy="158" r="4" fill="#6F866B" opacity="0.32" />
+                  <circle cx="188" cy="158" r="4" fill="#6F866B" opacity="0.32" />
+                  <circle cx="238" cy="158" r="4" fill="#6F866B" opacity="0.32" />
+                  <circle cx="138" cy="194" r="4" fill="#6F866B" opacity="0.32" />
+                  <circle cx="188" cy="194" r="4" fill="#6F866B" opacity="0.32" />
+                  <circle cx="303" cy="228" r="48" fill="#F7F5F0" stroke="#8FA98C" strokeWidth="2.5" opacity="0.65" />
+                  <path
+                    d="M283 228 l14 14 l26 -30"
+                    stroke="#8FA98C"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity="0.75"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         </header>
-
-        <div className="cw-pb-intro">
-          <p className="cw-pb-eyebrow">Reservas en línea</p>
-          <h1 className="cw-pb-title">Reserva tu cita</h1>
-          <p className="cw-pb-intro-text">
-            Selecciona el servicio que necesitas. En el siguiente paso podrás elegir la fecha y el horario.
-          </p>
-        </div>
 
         <ol className="cw-pb-steps" aria-label="Progreso de la reserva">
           {[

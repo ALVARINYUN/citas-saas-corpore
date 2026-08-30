@@ -17,6 +17,7 @@
   --muted: #7c8c95;
   --border-soft: rgba(143, 169, 140, 0.42);
   --verde-claro: #eaf0e8;
+  --verde-oscuro: #6f866b;
 }
 
 @theme inline {
@@ -845,79 +846,178 @@ body {
   padding: 20px;
 }
 
-/* ---------- Encabezado ---------- */
+/* ---------- Cabecera / hero ---------- */
 
-.cw-pb-header {
-  display: flex;
-  align-items: center;
-  padding: 4px 0 20px;
+.cw-pb-hero {
+  margin-bottom: 80px;
+  animation: cw-pb-hero-in 220ms ease-out;
 }
 
-.cw-pb-brand {
+@keyframes cw-pb-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Logo centrado respecto a TODA la pagina -- a proposito fuera de
+   .cw-pb-hero-container/.cw-pb-hero-content, para que su centrado no
+   dependa del ancho de la columna izquierda del grid. */
+.cw-pb-logo-wrapper {
+  width: 100%;
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 12px;
+  padding-top: 48px;
+}
+
+.cw-pb-logo-img.corpore-logo {
+  width: clamp(240px, 26vw, 390px);
+  height: auto;
+  border-radius: 0;
+  object-fit: contain;
+}
+
+.cw-pb-logo-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: clamp(240px, 26vw, 390px);
+  text-align: center;
+}
+
+.cw-pb-logo-symbol {
+  width: 30%;
+  max-width: 96px;
+  height: auto;
+  margin-bottom: 2px;
+}
+
+.cw-pb-logo-name {
+  font-family: var(--font-display-serif), serif;
+  font-style: italic;
+  font-size: clamp(30px, 3.4vw, 42px);
+  line-height: 1;
+  color: #1e4e5f;
+}
+
+.cw-pb-logo-sub {
+  margin-top: 8px;
+  font-family: var(--font-body), sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #7c9577;
+}
+
+.cw-pb-hero-container {
+  width: min(100% - 48px, 1240px);
+  margin-inline: auto;
+  margin-top: 72px;
+}
+
+.cw-pb-hero-content {
+  display: grid;
+  grid-template-columns: minmax(0, 58%) minmax(320px, 42%);
+  align-items: center;
+  gap: 32px;
+}
+
+.cw-pb-hero-copy {
   min-width: 0;
 }
 
-.cw-pb-logo-img {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.cw-pb-logo-mark {
-  width: 60px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-.cw-pb-brand-name {
-  font-family: var(--font-display-serif), serif;
-  font-style: italic;
-  font-size: 22px;
-  color: var(--petroleo);
-  line-height: 1.1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.cw-pb-brand-tagline {
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--salvia);
-}
-
-.cw-pb-intro {
-  margin-bottom: 30px;
-}
-
 .cw-pb-eyebrow {
-  font-size: 11px;
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--salvia);
-  margin: 0 0 6px;
+  margin: 0 0 24px;
 }
 
 .cw-pb-title {
   font-family: var(--font-display-serif), serif;
   font-style: italic;
-  font-size: clamp(28px, 5vw, 38px);
+  font-size: clamp(2.5rem, 5vw, 4.25rem);
+  line-height: 1.05;
   color: var(--petroleo);
-  margin: 0 0 8px;
+  margin: 0 0 28px;
+}
+
+@media (min-width: 900px) {
+  .cw-pb-title {
+    white-space: nowrap;
+  }
 }
 
 .cw-pb-intro-text {
-  font-size: 14px;
-  color: #66736d;
-  max-width: 56ch;
+  font-family: var(--font-body), sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--grafito);
+  max-width: 700px;
   margin: 0;
+}
+
+.cw-pb-hero-visual {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  opacity: 0.9;
+}
+
+.cw-pb-hero-visual svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@media (max-width: 1023.98px) {
+  .cw-pb-hero-content {
+    grid-template-columns: 1fr;
+  }
+
+  .cw-pb-hero-visual {
+    max-width: 260px;
+    margin: 24px auto 0;
+    opacity: 0.55;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .cw-pb-hero {
+    margin-bottom: 56px;
+  }
+
+  .cw-pb-logo-wrapper {
+    padding-top: 40px;
+  }
+
+  .cw-pb-logo-block,
+  .cw-pb-logo-img.corpore-logo {
+    width: clamp(220px, 60vw, 260px);
+  }
+
+  .cw-pb-hero-container {
+    margin-top: 56px;
+  }
+
+  .cw-pb-hero-visual {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cw-pb-hero {
+    animation: none;
+  }
 }
 
 /* ---------- Indicador de pasos (real, no decorativo) ---------- */
