@@ -40,6 +40,19 @@ interface Slot {
 
 type LoadState = "idle" | "loading" | "loaded" | "error";
 
+/**
+ * Íconos ilustrados reales para los dos servicios con imagen propia
+ * (public/icons/*.png). Los demás servicios (ej. clases grupales que se
+ * vayan agregando después) siguen usando el ícono lineal genérico de
+ * lucide-react -- no inventamos una imagen para un servicio que no la tiene.
+ */
+function getServiceIconSrc(serviceName: string): string | null {
+  const name = serviceName.toLowerCase();
+  if (name.includes("pilates")) return "/icons/pilates.png";
+  if (name.includes("fisioterapia")) return "/icons/fisioterapia.png";
+  return null;
+}
+
 export default function BookingPage() {
   const { slug } = useParams<{ slug: string }>();
 
@@ -354,6 +367,7 @@ export default function BookingPage() {
                 <div className="cw-pb-service-grid">
                   {services.map((s) => {
                     const selected = selectedService?.id === s.id;
+                    const iconSrc = getServiceIconSrc(s.name);
                     const Icon = s.capacity > 1 ? UsersRound : CalendarDays;
                     return (
                       <button
@@ -364,7 +378,12 @@ export default function BookingPage() {
                         className={`cw-pb-service-card ${selected ? "selected" : ""}`}
                       >
                         <span className="cw-pb-service-icon" aria-hidden="true">
-                          <Icon size={22} />
+                          {iconSrc ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={iconSrc} alt="" />
+                          ) : (
+                            <Icon size={22} />
+                          )}
                         </span>
                         <span className="cw-pb-service-name">{s.name}</span>
                         <span className="cw-pb-service-meta">

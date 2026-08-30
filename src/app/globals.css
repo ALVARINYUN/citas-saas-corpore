@@ -1095,11 +1095,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: rgba(228, 214, 190, 0.4);
   color: var(--salvia);
+  flex-shrink: 0;
+}
+
+.cw-pb-service-icon img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
 }
 
 .cw-pb-service-name {
