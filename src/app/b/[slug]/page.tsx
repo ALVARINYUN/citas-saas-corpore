@@ -2,7 +2,17 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { CalendarDays, Clock3, UsersRound, CircleCheck, CalendarCheck, Globe2, Loader2 } from "lucide-react";
+import {
+  CalendarDays,
+  Clock3,
+  UsersRound,
+  CircleCheck,
+  CalendarCheck,
+  Globe2,
+  Loader2,
+  ChevronRight,
+  ShieldCheck,
+} from "lucide-react";
 import BookingCalendar, { ViewedMonth } from "./_components/BookingCalendar";
 import BookingSummary from "./_components/BookingSummary";
 import {
@@ -53,6 +63,30 @@ function getServiceIconSrc(serviceName: string): string | null {
   return null;
 }
 
+/**
+ * Descripción breve por servicio. Se usa SOLO si el servicio no trae ya su
+ * propia `description` desde la API (dato real) -- para los tres servicios
+ * reales de Corpore que todavía no tienen descripción cargada en el panel
+ * de administración, se ofrece un texto de respaldo con la copy que pidió
+ * el negocio, sin inventar nada para servicios que no sean estos tres.
+ */
+function getServiceFallbackDescription(serviceName: string): string | null {
+  const name = serviceName.toLowerCase();
+  if (name.includes("pilates")) return "Sesión guiada de movimiento y control corporal.";
+  if (name.includes("fisioterapia")) return "Valoración y atención fisioterapéutica personalizada.";
+  if (name.includes("grupal")) return "Sesión de práctica en grupo reducido.";
+  return null;
+}
+
+/** Fondo suave distinto por servicio, para que los tres círculos no se vean idénticos. */
+function getServiceIconBgClass(service: { name: string; capacity: number }): string {
+  const name = service.name.toLowerCase();
+  if (name.includes("pilates")) return "cw-pb-icon-bg-pilates";
+  if (name.includes("fisioterapia")) return "cw-pb-icon-bg-fisio";
+  if (service.capacity > 1) return "cw-pb-icon-bg-grupal";
+  return "";
+}
+
 export default function BookingPage() {
   const { slug } = useParams<{ slug: string }>();
 
@@ -76,15 +110,20 @@ export default function BookingPage() {
   const [amPmTab, setAmPmTab] = useState<"morning" | "afternoon">("morning");
   const [clearedNotice, setClearedNotice] = useState<string | null>(null);
 
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  // Paso REAL del flujo (no derivado): solo avanza cuando el usuario pulsa
+  // "Continuar" -- seleccionar un servicio o un horario no revela el paso
+  // siguiente por sí solo.
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [confirmed, setConfirmed] = useState(false);
 
-  const detailsRef = useRef<HTMLDivElement | null>(null);
+  const step2HeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const step3HeadingRef = useRef<HTMLHeadingElement | null>(null);
   const morningTabRef = useRef<HTMLButtonElement | null>(null);
   const afternoonTabRef = useRef<HTMLButtonElement | null>(null);
+  const serviceCardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   // ---- Carga inicial: negocio + servicios ----
   useEffect(() => {
@@ -173,14 +212,12 @@ export default function BookingPage() {
     if (selectedSlot) setClearedNotice("Cambiaste de servicio, elige un horario de nuevo.");
     setSelectedService(s);
     setSelectedSlot(null);
-    setDetailsOpen(false);
   }
 
   function handleSelectDate(dateKey: string) {
     if (selectedSlot) setClearedNotice("Elegiste otra fecha, vuelve a elegir un horario.");
     setSelectedDate(dateKey);
     setSelectedSlot(null);
-    setDetailsOpen(false);
   }
 
   function handleSelectSlot(slot: Slot) {
@@ -189,7 +226,11 @@ export default function BookingPage() {
   }
 
   function handleChangeSelection() {
-    setDetailsOpen(false);
+    setCurrentStep(currentStep === 3 ? 2 : 1);
+  }
+
+  function goToStep(n: number) {
+    if (n < currentStep) setCurrentStep(n as 1 | 2 | 3);
   }
 
   async function handleConfirm() {
@@ -220,12 +261,26 @@ export default function BookingPage() {
   }
 
   async function handlePrimary() {
-    if (!detailsOpen) {
+    if (currentStep === 1) {
+      if (!selectedService) return;
+      setCurrentStep(2);
+      // setTimeout (no requestAnimationFrame): mover el foco al encabezado
+      // del paso nuevo no depende de sincronizarse con un frame de pintado,
+      // y rAF puede no dispararse en absoluto si la pestaña no está
+      // realmente compuesta en pantalla en ese instante.
+      setTimeout(() => {
+        step2HeadingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        step2HeadingRef.current?.focus();
+      }, 0);
+      return;
+    }
+    if (currentStep === 2) {
       if (!selectedSlot) return;
-      setDetailsOpen(true);
-      requestAnimationFrame(() => {
-        detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      setCurrentStep(3);
+      setTimeout(() => {
+        step3HeadingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        step3HeadingRef.current?.focus();
+      }, 0);
       return;
     }
     await handleConfirm();
@@ -249,11 +304,13 @@ export default function BookingPage() {
   );
   const visibleSlots = amPmTab === "morning" ? morningSlots : afternoonSlots;
 
-  const currentStep = detailsOpen ? 3 : selectedService ? 2 : 1;
-
   const dateLabelFull = selectedDate ? formatDateLabel(selectedDate) : null;
   const dateLabelShort = selectedDate ? formatDateLabel(selectedDate, true) : null;
   const timeLabel = selectedSlot && business ? formatTimeLabel(selectedSlot.start, business.timezone) : null;
+
+  const primaryLabel = currentStep === 3 ? "Confirmar cita" : "Continuar";
+  const primaryDisabled =
+    currentStep === 1 ? !selectedService : currentStep === 2 ? !selectedSlot : !form.name;
 
   if (servicesState === "error") {
     return (
@@ -289,7 +346,7 @@ export default function BookingPage() {
 
   return (
     <main className="cw-pb-page">
-      <div className="cw-pb-shell">
+      <div className={`cw-pb-shell ${currentStep >= 2 ? "has-fixed-bar" : ""}`}>
         <header className="cw-pb-header">
           <div className="cw-pb-brand">
             {business?.logoUrl ? (
@@ -308,30 +365,39 @@ export default function BookingPage() {
             )}
             <div>
               <div className="cw-pb-brand-name">{business?.name ?? "Cargando…"}</div>
-              <div className="cw-pb-brand-tagline">Reserva tu cita</div>
+              <div className="cw-pb-brand-tagline">Pilates · Fisioterapia</div>
             </div>
           </div>
         </header>
 
-        <h1 className="cw-pb-title">Reserva tu cita</h1>
+        <div className="cw-pb-intro">
+          <p className="cw-pb-eyebrow">Reservas en línea</p>
+          <h1 className="cw-pb-title">Reserva tu cita</h1>
+          <p className="cw-pb-intro-text">
+            Selecciona el servicio que necesitas. En el siguiente paso podrás elegir la fecha y el horario.
+          </p>
+        </div>
 
         <ol className="cw-pb-steps" aria-label="Progreso de la reserva">
           {[
-            { n: 1, label: "Servicio" },
-            { n: 2, label: "Fecha y hora" },
-            { n: 3, label: "Confirmación" },
-          ].map(({ n, label }) => (
+            { n: 1, title: "Servicio", sub: "Elige tu atención" },
+            { n: 2, title: "Fecha y hora", sub: "Consulta disponibilidad" },
+            { n: 3, title: "Confirmación", sub: "Revisa tu reserva" },
+          ].map(({ n, title, sub }) => (
             <li key={n} className={`cw-pb-step ${currentStep === n ? "active" : ""} ${currentStep > n ? "done" : ""}`}>
               <button
                 type="button"
                 disabled={n >= currentStep}
-                onClick={() => setDetailsOpen(false)}
+                onClick={() => goToStep(n)}
                 aria-current={currentStep === n ? "step" : undefined}
               >
                 <span className="cw-pb-step-dot">
                   {currentStep > n ? <CircleCheck size={14} aria-hidden="true" /> : n}
                 </span>
-                {label}
+                <span className="cw-pb-step-text">
+                  <span className="cw-pb-step-title">{title}</span>
+                  <span className="cw-pb-step-sub">{sub}</span>
+                </span>
               </button>
             </li>
           ))}
@@ -348,8 +414,9 @@ export default function BookingPage() {
             {/* PASO 1: SERVICIO */}
             <section className="cw-pb-section" aria-labelledby="step1-heading">
               <h2 id="step1-heading" className="cw-pb-section-title">
-                1. Elige un servicio
+                Elige un servicio
               </h2>
+              <p className="cw-pb-section-hint">Selecciona una opción para continuar.</p>
 
               {servicesState === "loading" && (
                 <div className="cw-pb-service-grid" aria-busy="true">
@@ -364,49 +431,88 @@ export default function BookingPage() {
               )}
 
               {servicesState === "loaded" && services.length > 0 && (
-                <div className="cw-pb-service-grid">
+                <div
+                  className="cw-pb-service-grid"
+                  role="radiogroup"
+                  aria-labelledby="step1-heading"
+                  onKeyDown={(e) => {
+                    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
+                    e.preventDefault();
+                    const dir = e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 1;
+                    const idx = services.findIndex((s) => s.id === selectedService?.id);
+                    const nextIdx = idx === -1 ? 0 : (idx + dir + services.length) % services.length;
+                    const next = services[nextIdx];
+                    handleSelectService(next);
+                    serviceCardRefs.current[next.id]?.focus();
+                  }}
+                >
                   {services.map((s) => {
                     const selected = selectedService?.id === s.id;
                     const iconSrc = getServiceIconSrc(s.name);
                     const Icon = s.capacity > 1 ? UsersRound : CalendarDays;
+                    const description = s.description || getServiceFallbackDescription(s.name);
+                    const isRovingTarget = selectedService ? selected : services[0]?.id === s.id;
                     return (
                       <button
                         key={s.id}
+                        ref={(el) => {
+                          serviceCardRefs.current[s.id] = el;
+                        }}
                         type="button"
-                        aria-pressed={selected}
+                        role="radio"
+                        aria-checked={selected}
+                        tabIndex={isRovingTarget ? 0 : -1}
                         onClick={() => handleSelectService(s)}
                         className={`cw-pb-service-card ${selected ? "selected" : ""}`}
                       >
-                        <span className="cw-pb-service-icon" aria-hidden="true">
+                        <span className={`cw-pb-service-icon ${getServiceIconBgClass(s)}`} aria-hidden="true">
                           {iconSrc ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={iconSrc} alt="" />
                           ) : (
-                            <Icon size={22} />
+                            <Icon size={26} />
                           )}
                         </span>
-                        <span className="cw-pb-service-name">{s.name}</span>
-                        <span className="cw-pb-service-meta">
-                          <Clock3 size={13} aria-hidden="true" /> {s.durationMin} min
-                          {s.price ? ` · $${s.price}` : ""}
-                        </span>
-                        {s.capacity > 1 && <span className="cw-pb-service-badge">Grupal · cupo {s.capacity}</span>}
-                        {selected && (
-                          <span className="cw-pb-service-selected" aria-hidden="true">
-                            <CircleCheck size={18} />
+
+                        <span className="cw-pb-service-body">
+                          <span className="cw-pb-service-name">{s.name}</span>
+                          <span className="cw-pb-service-meta">
+                            <Clock3 size={13} aria-hidden="true" /> {s.durationMin} min
+                            {s.price ? ` · $${s.price}` : ""}
                           </span>
-                        )}
+                          {s.capacity > 1 && (
+                            <span className="cw-pb-service-badge">Grupal · cupo {s.capacity}</span>
+                          )}
+                          {description && <span className="cw-pb-service-desc">{description}</span>}
+                        </span>
+
+                        <span className="cw-pb-service-indicator">
+                          <span className="cw-pb-service-radio" aria-hidden="true">
+                            {selected && <CircleCheck size={16} />}
+                          </span>
+                          <span className="cw-pb-service-select-label">
+                            {selected ? "Seleccionado" : "Seleccionar"}
+                            <ChevronRight size={14} className="cw-pb-service-arrow" aria-hidden="true" />
+                          </span>
+                        </span>
                       </button>
                     );
                   })}
                 </div>
               )}
+
+              {servicesState === "loaded" && services.length > 0 && (
+                <p className="cw-pb-privacy-strip">
+                  <ShieldCheck size={15} aria-hidden="true" />
+                  Tus datos se utilizarán únicamente para gestionar la reserva.
+                </p>
+              )}
             </section>
 
             {/* PASO 2: FECHA Y HORA */}
-            {selectedService && (
+            {currentStep >= 2 && selectedService && (
               <section className="cw-pb-section" aria-labelledby="step2-heading">
-                <h2 id="step2-heading" className="cw-pb-section-title">
+                <h2 id="step2-heading" className="cw-pb-section-title" tabIndex={-1} ref={step2HeadingRef}>
                   2. Fecha y hora
                 </h2>
 
@@ -519,9 +625,9 @@ export default function BookingPage() {
             )}
 
             {/* PASO 3: CONFIRMACIÓN */}
-            {detailsOpen && selectedSlot && (
-              <section className="cw-pb-section" aria-labelledby="step3-heading" ref={detailsRef}>
-                <h2 id="step3-heading" className="cw-pb-section-title">
+            {currentStep >= 3 && selectedSlot && (
+              <section className="cw-pb-section" aria-labelledby="step3-heading">
+                <h2 id="step3-heading" className="cw-pb-section-title" tabIndex={-1} ref={step3HeadingRef}>
                   3. Confirmación
                 </h2>
 
@@ -562,13 +668,15 @@ export default function BookingPage() {
 
           <BookingSummary
             variant="sidebar"
+            mobileInline={currentStep === 1}
             serviceName={selectedService?.name ?? null}
+            serviceIconSrc={selectedService ? getServiceIconSrc(selectedService.name) : null}
             durationMin={selectedService?.durationMin ?? null}
             dateLabel={dateLabelFull}
             timeLabel={timeLabel}
             staffName={selectedSlot?.staffName ?? null}
-            primaryLabel={detailsOpen ? "Confirmar cita" : "Continuar"}
-            primaryDisabled={detailsOpen ? !form.name : !selectedSlot}
+            primaryLabel={primaryLabel}
+            primaryDisabled={primaryDisabled}
             submitting={submitting}
             onPrimary={handlePrimary}
             onChangeSelection={handleChangeSelection}
@@ -576,19 +684,22 @@ export default function BookingPage() {
         </div>
       </div>
 
-      <BookingSummary
-        variant="bar"
-        serviceName={selectedService?.name ?? null}
-        durationMin={selectedService?.durationMin ?? null}
-        dateLabel={dateLabelShort}
-        timeLabel={timeLabel}
-        staffName={selectedSlot?.staffName ?? null}
-        primaryLabel={detailsOpen ? "Confirmar cita" : "Continuar"}
-        primaryDisabled={detailsOpen ? !form.name : !selectedSlot}
-        submitting={submitting}
-        onPrimary={handlePrimary}
-        onChangeSelection={handleChangeSelection}
-      />
+      {currentStep >= 2 && (
+        <BookingSummary
+          variant="bar"
+          serviceName={selectedService?.name ?? null}
+          serviceIconSrc={selectedService ? getServiceIconSrc(selectedService.name) : null}
+          durationMin={selectedService?.durationMin ?? null}
+          dateLabel={dateLabelShort}
+          timeLabel={timeLabel}
+          staffName={selectedSlot?.staffName ?? null}
+          primaryLabel={primaryLabel}
+          primaryDisabled={primaryDisabled}
+          submitting={submitting}
+          onPrimary={handlePrimary}
+          onChangeSelection={handleChangeSelection}
+        />
+      )}
     </main>
   );
 }

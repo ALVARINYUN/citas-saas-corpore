@@ -1,10 +1,15 @@
 "use client";
 
-import { CalendarDays, Clock3, UsersRound, Pencil, ArrowRight, Loader2 } from "lucide-react";
+import { CalendarDays, Clock3, Pencil, ArrowRight, Loader2 } from "lucide-react";
 
 interface BookingSummaryProps {
   variant: "sidebar" | "bar";
+  /** Solo aplica a variant="sidebar": en vez de ocultarse en móvil, se
+   * muestra en flujo normal (no fija) debajo del contenido. Se usa en el
+   * paso 1, donde todavía no hay barra fija de horario/fecha que mostrar. */
+  mobileInline?: boolean;
   serviceName: string | null;
+  serviceIconSrc?: string | null;
   durationMin: number | null;
   dateLabel: string | null;
   timeLabel: string | null;
@@ -18,7 +23,9 @@ interface BookingSummaryProps {
 
 export default function BookingSummary({
   variant,
+  mobileInline = false,
   serviceName,
+  serviceIconSrc,
   durationMin,
   dateLabel,
   timeLabel,
@@ -37,15 +44,71 @@ export default function BookingSummary({
   const rootClass = variant === "sidebar" ? "cw-pb-summary" : "cw-pb-summary-bar";
 
   return (
-    <aside className={rootClass} aria-label="Resumen de tu cita">
+    <aside className={`${rootClass} ${mobileInline ? "mobile-inline" : ""}`} aria-label="Resumen de tu cita">
       {variant === "sidebar" && <h2 className="cw-pb-summary-title">Resumen de tu cita</h2>}
 
-      {!serviceName ? (
-        <p className="cw-pb-summary-empty">Elige un servicio para comenzar.</p>
-      ) : (
-        <div className={variant === "sidebar" ? "cw-pb-summary-body" : "cw-pb-summary-bar-body"}>
-          <div className="cw-pb-summary-service">{serviceName}</div>
+      {variant === "sidebar" && !serviceName && (
+        <>
+          <p className="cw-pb-summary-empty">Aún no has seleccionado un servicio</p>
+          <p className="cw-pb-summary-empty-sub">
+            El resumen aparecerá aquí a medida que completes la reserva.
+          </p>
+        </>
+      )}
 
+      {variant === "sidebar" && serviceName && (
+        <div className="cw-pb-summary-body">
+          <div className="cw-pb-summary-service-row">
+            <span className="cw-pb-summary-service-icon" aria-hidden="true">
+              {serviceIconSrc ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={serviceIconSrc} alt="" />
+              ) : (
+                <CalendarDays size={20} />
+              )}
+            </span>
+            <div>
+              <div className="cw-pb-summary-service">{serviceName}</div>
+              {durationMin != null && (
+                <div className="cw-pb-summary-duration">
+                  <Clock3 size={12} aria-hidden="true" /> {durationMin} min
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button type="button" className="cw-pb-summary-change" onClick={onChangeSelection}>
+            <Pencil size={13} aria-hidden="true" /> Cambiar selección
+          </button>
+        </div>
+      )}
+
+      {variant === "sidebar" && (
+        <dl className="cw-pb-summary-rows" aria-live="polite">
+          <div className="cw-pb-summary-row">
+            <dt>Servicio</dt>
+            <dd key={serviceName ?? "empty"} className="cw-pb-fade-in">
+              {serviceName ?? "—"}
+            </dd>
+          </div>
+          <div className="cw-pb-summary-row">
+            <dt>Fecha</dt>
+            <dd key={dateLabel ?? "empty"} className="cw-pb-fade-in">
+              {dateLabel ?? "—"}
+            </dd>
+          </div>
+          <div className="cw-pb-summary-row">
+            <dt>Hora</dt>
+            <dd key={timeLabel ?? "empty"} className="cw-pb-fade-in">
+              {timeLabel ?? "—"}
+            </dd>
+          </div>
+        </dl>
+      )}
+
+      {variant === "bar" && (
+        <div className="cw-pb-summary-bar-body">
+          <div className="cw-pb-summary-service">{serviceName}</div>
           <div className="cw-pb-summary-meta">
             {durationMin != null && (
               <span>
@@ -59,18 +122,8 @@ export default function BookingSummary({
                 {timeLabel ? ` · ${timeLabel}` : ""}
               </span>
             )}
-            {staffName && (
-              <span>
-                <UsersRound size={14} aria-hidden="true" /> {staffName}
-              </span>
-            )}
+            {staffName && <span>{staffName}</span>}
           </div>
-
-          {variant === "sidebar" && (
-            <button type="button" className="cw-pb-summary-change" onClick={onChangeSelection}>
-              <Pencil size={13} aria-hidden="true" /> Cambiar selección
-            </button>
-          )}
         </div>
       )}
 
@@ -92,6 +145,8 @@ export default function BookingSummary({
           </>
         )}
       </button>
+
+      {variant === "sidebar" && <p className="cw-pb-summary-footer-note">Reserva segura y confidencial</p>}
     </aside>
   );
 }
