@@ -896,29 +896,29 @@ body {
   text-align: center;
 }
 
-/* 40% del ancho del bloque; max-width subido a 180px (antes 140px) para
-   que no recorte el simbolo ahora que el bloque de escritorio llega a
-   420px -- sin este ajuste el 40% (168px) quedaria clampeado por el
-   tope viejo, repitiendo el mismo problema de espacio vacio. */
+/* El ancho de .cw-pb-logo-block (420px) es solo la caja flex que centra
+   el contenido -- no fuerza el tamano visual del simbolo/texto, que es
+   lo que el ojo realmente percibe como "el logo". Por eso el tamano
+   real se controla aqui, no en el contenedor. */
 .cw-pb-logo-symbol {
-  width: 40%;
-  max-width: 180px;
+  width: 55%;
+  max-width: 230px;
   height: auto;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .cw-pb-logo-name {
   font-family: var(--font-display-serif), serif;
   font-style: italic;
-  font-size: 60px;
+  font-size: 88px;
   line-height: 1;
   color: #1e4e5f;
 }
 
 .cw-pb-logo-sub {
-  margin-top: 10px;
+  margin-top: 12px;
   font-family: var(--font-body), sans-serif;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 500;
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -980,11 +980,11 @@ body {
   }
 
   .cw-pb-logo-name {
-    font-size: 42px;
+    font-size: 62px;
   }
 
   .cw-pb-logo-sub {
-    font-size: 13px;
+    font-size: 16px;
   }
 }
 
@@ -1004,11 +1004,11 @@ body {
   }
 
   .cw-pb-logo-name {
-    font-size: 36px;
+    font-size: 53px;
   }
 
   .cw-pb-logo-sub {
-    font-size: 12px;
+    font-size: 15px;
   }
 
   .cw-pb-hero-container {
