@@ -875,8 +875,14 @@ body {
   padding-top: 48px;
 }
 
+/* Ancho fijo por breakpoint (no vw-fluido) para que el logo tenga
+   siempre la presencia visual requerida frente al titulo, en vez de
+   encogerse en viewports intermedios. max-width:none es defensivo --
+   no existe ninguna regla global `img{max-width:100%}` en este archivo
+   que lo necesite, pero se deja explicito por si se agrega en el futuro. */
 .cw-pb-logo-img.corpore-logo {
-  width: clamp(240px, 26vw, 390px);
+  width: 320px;
+  max-width: none;
   height: auto;
   border-radius: 0;
   object-fit: contain;
@@ -886,29 +892,32 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: clamp(240px, 26vw, 390px);
+  width: 320px;
   text-align: center;
 }
 
+/* 40% del ancho del bloque, sin el max-width:96px que antes limitaba el
+   simbolo a una fraccion diminuta del logo -- esa era la regla que lo
+   dejaba chico. */
 .cw-pb-logo-symbol {
-  width: 30%;
-  max-width: 96px;
+  width: 40%;
+  max-width: 140px;
   height: auto;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .cw-pb-logo-name {
   font-family: var(--font-display-serif), serif;
   font-style: italic;
-  font-size: clamp(30px, 3.4vw, 42px);
+  font-size: 48px;
   line-height: 1;
   color: #1e4e5f;
 }
 
 .cw-pb-logo-sub {
-  margin-top: 8px;
+  margin-top: 10px;
   font-family: var(--font-body), sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -918,7 +927,7 @@ body {
 .cw-pb-hero-container {
   width: min(100% - 48px, 1240px);
   margin-inline: auto;
-  margin-top: 72px;
+  margin-top: 56px;
 }
 
 .cw-pb-hero-content {
@@ -942,8 +951,8 @@ body {
 .cw-pb-title {
   font-family: var(--font-display-serif), serif;
   font-style: italic;
-  font-size: clamp(2.5rem, 5vw, 4.25rem);
-  line-height: 1.05;
+  font-size: clamp(3rem, 4vw, 3.4rem);
+  line-height: 1.08;
   color: var(--petroleo);
   margin: 0 0 28px;
 }
@@ -963,6 +972,21 @@ body {
   margin: 0;
 }
 
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .cw-pb-logo-block,
+  .cw-pb-logo-img.corpore-logo {
+    width: 280px;
+  }
+
+  .cw-pb-logo-name {
+    font-size: 42px;
+  }
+
+  .cw-pb-logo-sub {
+    font-size: 13px;
+  }
+}
+
 @media (max-width: 767.98px) {
   .cw-pb-hero {
     margin-bottom: 56px;
@@ -974,11 +998,28 @@ body {
 
   .cw-pb-logo-block,
   .cw-pb-logo-img.corpore-logo {
-    width: clamp(220px, 60vw, 260px);
+    width: min(240px, 78vw);
+    max-width: none;
+  }
+
+  .cw-pb-logo-name {
+    font-size: 36px;
+  }
+
+  .cw-pb-logo-sub {
+    font-size: 12px;
   }
 
   .cw-pb-hero-container {
     margin-top: 56px;
+  }
+
+  .cw-pb-title {
+    font-size: clamp(2.5rem, 11vw, 3rem);
+  }
+
+  .cw-pb-intro-text {
+    font-size: 16px;
   }
 }
 
