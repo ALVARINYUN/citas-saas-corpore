@@ -68,11 +68,10 @@ function zonedTimeToUtc(
  * esa zona, no en la del servidor donde corre el código.
  *
  * El cupo (Service.capacity) permite que un mismo horario reciba más de una
- * reserva (ej: una clase grupal). Para servicios individuales (capacity=1)
- * se ofrecen horarios cada 15 minutos, como antes. Para servicios con cupo
- * >1 se ofrecen horarios fijos separados por la duración completa del
- * servicio (no tendría sentido ofrecer una clase grupal de 60 min a las
- * 9:00 y también a las 9:15).
+ * reserva (ej: una clase grupal). En ambos casos (individual o con cupo) los
+ * horarios se ofrecen separados por la duración completa del servicio: no
+ * tendría sentido ofrecer una clase de 50 min a las 9:00 y también a las
+ * 9:15, porque el profesional queda ocupado hasta las 9:50.
  */
 export async function getAvailableSlots(
   businessId: string,
@@ -120,7 +119,12 @@ export async function getAvailableSlots(
   });
 
   const capacity = service.capacity;
-  const stepMinutes = capacity > 1 ? service.durationMin : 15;
+  // El paso entre horarios es siempre la duracion del servicio -- para uno
+  // individual (capacity=1), un paso mas chico que la duracion ofreceria
+  // horarios que en realidad ya estan ocupados por la cita anterior (ej:
+  // Pilates de 50 min a las 9:00 deja al profesional ocupado hasta las
+  // 9:50, asi que el siguiente horario real es 9:50, no 9:15).
+  const stepMinutes = service.durationMin;
 
   const slots: TimeSlot[] = [];
 
