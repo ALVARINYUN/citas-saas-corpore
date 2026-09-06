@@ -1315,27 +1315,32 @@ body {
 .cw-pb-service-body {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 6px;
   min-width: 0;
 }
 
 .cw-pb-service-name {
   font-family: var(--font-display-serif), serif;
-  font-size: 18px;
+  font-size: 20px;
   color: var(--petroleo);
 }
 
+/* #5c6b73 en vez de --muted (#7c8c95): a 13px, --muted da un contraste
+   de ~3.5:1 sobre blanco, por debajo del 4.5:1 que pide WCAG AA para
+   texto normal. Con el nuevo tono el contraste sube a ~5.5:1. */
 .cw-pb-service-meta {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  color: #5c6b73;
 }
 
 .cw-pb-service-badge {
-  font-size: 11px;
-  color: var(--salvia);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--petroleo);
   background: rgba(143, 169, 140, 0.14);
   border-radius: 999px;
   padding: 3px 10px;
@@ -1343,7 +1348,9 @@ body {
 }
 
 .cw-pb-service-desc {
-  font-size: 12px;
+  font-family: var(--font-body), sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
   color: #66736d;
 }
 
@@ -1392,7 +1399,7 @@ body {
   }
 
   .cw-pb-service-body {
-    gap: 4px;
+    gap: 8px;
   }
 
   .cw-pb-service-icon {
@@ -1406,7 +1413,7 @@ body {
   }
 
   .cw-pb-service-name {
-    font-size: 19px;
+    font-size: 22px;
   }
 
   /* En escritorio el indicador se ancla a la esquina superior derecha, no
@@ -1423,14 +1430,15 @@ body {
   .cw-pb-service-select-label {
     display: flex;
     align-items: center;
-    gap: 2px;
-    font-size: 11px;
-    color: #66736d;
+    gap: 3px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #5c6b73;
   }
 
   .cw-pb-service-card.selected .cw-pb-service-select-label {
     color: var(--petroleo);
-    font-weight: 500;
+    font-weight: 700;
   }
 
   .cw-pb-service-arrow {
