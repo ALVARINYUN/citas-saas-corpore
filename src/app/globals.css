@@ -630,7 +630,30 @@ body {
   font-size: 11px;
   color: var(--muted);
   padding: 0 10px;
+  margin-bottom: 6px;
+}
+
+.cw-preview-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
   margin-bottom: 24px;
+  font-size: 12px;
+  color: var(--salvia);
+  text-decoration: none;
+  width: fit-content;
+}
+
+.cw-preview-link:hover {
+  color: var(--petroleo);
+  text-decoration: underline;
+}
+
+.cw-preview-link:focus-visible {
+  outline: 2px solid var(--petroleo);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .cw-sidebar-link {
@@ -1533,31 +1556,6 @@ body {
   border-radius: 12px;
   font-size: 14px;
   color: #66736d;
-}
-
-/* Enlace discreto al panel de administración -- mismo tamaño/color
-   secundario que .cw-pb-privacy-strip, sin fondo ni look de botón. */
-.cw-pb-owner-link {
-  margin-top: 40px;
-  text-align: center;
-  font-size: 14px;
-}
-
-.cw-pb-owner-link a {
-  font-family: var(--font-body), sans-serif;
-  color: #66736d;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.cw-pb-owner-link a:hover {
-  color: var(--petroleo);
-}
-
-.cw-pb-owner-link a:focus-visible {
-  outline: 2px solid var(--petroleo);
-  outline-offset: 3px;
-  border-radius: 2px;
 }
 
 /* ---------- Calendario ---------- */

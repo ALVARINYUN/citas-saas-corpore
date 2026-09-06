@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { ExternalLink } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import LogoutButton from "./LogoutButton";
@@ -18,6 +19,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="cw-sidebar">
         <div className="cw-sidebar-brand">{business.name}</div>
         <div className="cw-sidebar-sub">/b/{business.slug}</div>
+        <a
+          href={`/b/${business.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cw-preview-link"
+        >
+          Ver página de reservas <ExternalLink size={12} aria-hidden="true" />
+        </a>
         <SidebarNav />
         <div className="cw-sidebar-footer">
           <LogoutButton />
@@ -33,6 +42,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 {business.name}
               </div>
               <div style={{ fontSize: 11, color: "var(--muted)" }}>/b/{business.slug}</div>
+              <a
+                href={`/b/${business.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cw-preview-link"
+                style={{ padding: 0, marginTop: 4, marginBottom: 0 }}
+              >
+                Ver página de reservas <ExternalLink size={11} aria-hidden="true" />
+              </a>
             </div>
             <LogoutButton />
           </header>
