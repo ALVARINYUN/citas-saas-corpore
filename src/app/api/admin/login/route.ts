@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { createSessionToken, SESSION_COOKIE } from "@/lib/jwt";
 
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_WINDOW_MS = 15 * 60 * 1000;
+
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json();
 
@@ -19,8 +22,46 @@ export async function POST(req: NextRequest) {
     include: { business: true },
   });
 
+  // Bloqueo por fuerza bruta guardado en BD (BusinessUser.failedLoginAttempts
+  // / lastFailedLoginAt), no en memoria del proceso -- en Vercel cada
+  // invocación puede correr en una instancia distinta, así que una variable
+  // en memoria no sirve para contar intentos entre peticiones.
+  const lockedOut =
+    user &&
+    user.failedLoginAttempts >= MAX_FAILED_ATTEMPTS &&
+    user.lastFailedLoginAt &&
+    Date.now() - user.lastFailedLoginAt.getTime() < LOCKOUT_WINDOW_MS;
+
+  if (lockedOut) {
+    return NextResponse.json(
+      { error: "Demasiados intentos, espera unos minutos." },
+      { status: 429 }
+    );
+  }
+
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    if (user) {
+      // Si la ventana de 15 min desde el último fallo ya expiró, el conteo
+      // arranca de nuevo en vez de seguir acumulando fallos viejos.
+      const withinWindow =
+        user.lastFailedLoginAt &&
+        Date.now() - user.lastFailedLoginAt.getTime() < LOCKOUT_WINDOW_MS;
+      await prisma.businessUser.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: (withinWindow ? user.failedLoginAttempts : 0) + 1,
+          lastFailedLoginAt: new Date(),
+        },
+      });
+    }
     return NextResponse.json({ error: "Correo o contraseña incorrectos" }, { status: 401 });
+  }
+
+  if (user.failedLoginAttempts > 0) {
+    await prisma.businessUser.update({
+      where: { id: user.id },
+      data: { failedLoginAttempts: 0, lastFailedLoginAt: null },
+    });
   }
 
   if (!user.business.active) {

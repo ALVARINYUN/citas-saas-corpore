@@ -1535,6 +1535,31 @@ body {
   color: #66736d;
 }
 
+/* Enlace discreto al panel de administración -- mismo tamaño/color
+   secundario que .cw-pb-privacy-strip, sin fondo ni look de botón. */
+.cw-pb-owner-link {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.cw-pb-owner-link a {
+  font-family: var(--font-body), sans-serif;
+  color: #66736d;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cw-pb-owner-link a:hover {
+  color: var(--petroleo);
+}
+
+.cw-pb-owner-link a:focus-visible {
+  outline: 2px solid var(--petroleo);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 /* ---------- Calendario ---------- */
 
 .cw-pb-calendar {

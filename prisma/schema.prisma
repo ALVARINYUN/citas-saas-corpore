@@ -48,6 +48,12 @@ model BusinessUser {
   role       BusinessRole @default(STAFF)
   createdAt  DateTime @default(now())
 
+  // Bloqueo por fuerza bruta: se cuentan en la BD (no en memoria) porque el
+  // proceso corre serverless en Vercel y una variable en memoria no
+  // persiste de forma confiable entre invocaciones.
+  failedLoginAttempts Int       @default(0)
+  lastFailedLoginAt   DateTime?
+
   @@unique([businessId, email])
 }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import {
   CalendarDays,
   Clock3,
@@ -690,6 +691,10 @@ export default function BookingPage() {
             onChangeSelection={handleChangeSelection}
           />
         </div>
+
+        <p className="cw-pb-owner-link">
+          <Link href="/admin/login">¿Eres el dueño del negocio? Entra al panel</Link>
+        </p>
       </div>
 
       {currentStep >= 2 && (
