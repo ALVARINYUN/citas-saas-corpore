@@ -469,12 +469,19 @@ export default function BookingPage() {
                         onClick={() => handleSelectService(s)}
                         className={`cw-pb-service-card ${selected ? "selected" : ""}`}
                       >
-                        <span className={`cw-pb-service-icon ${getServiceIconBgClass(s)}`} aria-hidden="true">
-                          {iconSrc ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={iconSrc} alt="" />
-                          ) : (
-                            <Icon size={26} />
+                        <span className="cw-pb-service-top-row">
+                          <span className={`cw-pb-service-icon ${getServiceIconBgClass(s)}`} aria-hidden="true">
+                            {iconSrc ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={iconSrc} alt="" />
+                            ) : (
+                              <Icon size={26} />
+                            )}
+                          </span>
+                          {selected && (
+                            <span className="cw-pb-service-status" aria-hidden="true">
+                              <CircleCheck size={13} /> Seleccionado
+                            </span>
                           )}
                         </span>
 
@@ -490,13 +497,10 @@ export default function BookingPage() {
                           {description && <span className="cw-pb-service-desc">{description}</span>}
                         </span>
 
-                        <span className="cw-pb-service-indicator">
-                          <span className="cw-pb-service-radio" aria-hidden="true">
-                            {selected && <CircleCheck size={16} />}
-                          </span>
-                          <span className="cw-pb-service-select-label">
+                        <span className="cw-pb-service-action">
+                          <span className="cw-pb-service-button">
                             {selected ? "Seleccionado" : "Seleccionar"}
-                            <ChevronRight size={14} className="cw-pb-service-arrow" aria-hidden="true" />
+                            <ChevronRight size={16} className="cw-pb-service-arrow" aria-hidden="true" />
                           </span>
                         </span>
                       </button>

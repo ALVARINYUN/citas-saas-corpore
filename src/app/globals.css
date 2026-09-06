@@ -818,7 +818,7 @@ body {
 }
 
 .cw-pb-shell {
-  max-width: 1320px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 20px 20px 24px;
 }
@@ -848,8 +848,31 @@ body {
 
 /* ---------- Cabecera / hero ---------- */
 
+/* Foto de estudio en el lado derecho, atenuada con un degradado hacia
+   --hueso de izquierda a derecha -- el logo/texto viven en la banda
+   opaca (0-50% del ancho aprox.), la foto respira en el resto. Si el
+   archivo /images/pilates-hero.webp todavia no existe, el fondo cae al
+   solid var(--hueso) sin romper nada. */
 .cw-pb-hero {
-  margin-bottom: 80px;
+  position: relative;
+  min-height: 430px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  background-color: var(--hueso);
+  background-image: linear-gradient(
+      90deg,
+      rgba(250, 247, 241, 1) 0%,
+      rgba(250, 247, 241, 0.98) 34%,
+      rgba(250, 247, 241, 0.76) 52%,
+      rgba(250, 247, 241, 0.12) 76%,
+      rgba(250, 247, 241, 0.02) 100%
+    ),
+    url("/images/pilates-hero.webp");
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
   animation: cw-pb-hero-in 220ms ease-out;
 }
 
@@ -937,6 +960,7 @@ body {
 
 .cw-pb-hero-copy {
   min-width: 0;
+  max-width: 620px;
 }
 
 .cw-pb-eyebrow {
@@ -945,8 +969,8 @@ body {
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--salvia);
-  margin: 0 0 24px;
+  color: var(--verde-oscuro);
+  margin: 0 0 20px;
 }
 
 .cw-pb-title {
@@ -955,7 +979,7 @@ body {
   font-size: clamp(3rem, 4vw, 3.4rem);
   line-height: 1.08;
   color: var(--petroleo);
-  margin: 0 0 28px;
+  margin: 0 0 20px;
 }
 
 @media (min-width: 900px) {
@@ -974,6 +998,19 @@ body {
 }
 
 @media (min-width: 768px) and (max-width: 1023.98px) {
+  .cw-pb-hero {
+    min-height: 400px;
+    background-image: linear-gradient(
+        90deg,
+        rgba(250, 247, 241, 1) 0%,
+        rgba(250, 247, 241, 0.98) 40%,
+        rgba(250, 247, 241, 0.85) 58%,
+        rgba(250, 247, 241, 0.35) 80%,
+        rgba(250, 247, 241, 0.15) 100%
+      ),
+      url("/images/pilates-hero.webp");
+  }
+
   .cw-pb-logo-block,
   .cw-pb-logo-img.corpore-logo {
     width: 280px;
@@ -990,7 +1027,16 @@ body {
 
 @media (max-width: 767.98px) {
   .cw-pb-hero {
-    margin-bottom: 56px;
+    min-height: 350px;
+    margin-bottom: 24px;
+    background-position: 62% center;
+    background-image: linear-gradient(
+        180deg,
+        rgba(250, 247, 241, 0.9) 0%,
+        rgba(250, 247, 241, 0.95) 60%,
+        rgba(250, 247, 241, 1) 100%
+      ),
+      url("/images/pilates-hero.webp");
   }
 
   .cw-pb-logo-wrapper {
@@ -1034,10 +1080,11 @@ body {
 
 .cw-pb-steps {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   list-style: none;
   margin: 0 0 28px;
-  padding: 0;
+  padding: 18px 0;
+  background: var(--hueso);
 }
 
 .cw-pb-step {
@@ -1049,11 +1096,11 @@ body {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 6px;
+  gap: 10px;
+  padding: 8px 6px;
   background: none;
   border: none;
-  border-bottom: 3px solid var(--border-soft);
+  border-bottom: 2px solid var(--border-soft);
   font-family: var(--font-body), sans-serif;
   font-size: 13px;
   color: var(--muted);
@@ -1077,11 +1124,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: 1.5px solid currentColor;
-  font-size: 12px;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
@@ -1098,14 +1145,15 @@ body {
 }
 
 .cw-pb-step-title {
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .cw-pb-step-sub {
-  font-size: 11px;
+  font-size: 0.82rem;
   color: #66736d;
   white-space: nowrap;
   overflow: hidden;
@@ -1217,59 +1265,87 @@ body {
 /* ---------- Grid de servicios ---------- */
 
 .cw-pb-service-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
 }
 
-/* Móvil (< 640px): tarjetas apiladas, composición HORIZONTAL --
-   ícono a la izquierda, texto al centro, indicador a la derecha. */
+@media (max-width: 1023.98px) {
+  .cw-pb-service-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .cw-pb-service-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* Misma tarjeta (columna vertical) en las tres anchuras -- solo cambia
+   cuántas caben por fila (services-grid) y si min-height se relaja en
+   móvil, donde apilar en 1 columna ya deja que la altura la de el
+   contenido. */
 .cw-pb-service-card {
   position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 14px;
-  text-align: left;
-  padding: 14px 16px;
-  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  min-height: 310px;
   width: 100%;
-  background: #ffffff;
-  border: 1.5px solid rgba(190, 183, 170, 0.55);
-  border-radius: 14px;
+  padding: 22px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(30, 78, 95, 0.06);
   cursor: pointer;
-  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+@media (max-width: 767.98px) {
+  .cw-pb-service-card {
+    min-height: auto;
+  }
 }
 
 .cw-pb-service-card:hover {
+  transform: translateY(-3px);
   border-color: var(--salvia);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(43, 43, 40, 0.07);
+  box-shadow: 0 12px 30px rgba(30, 78, 95, 0.11);
 }
 
 .cw-pb-service-card:active {
   transform: translateY(0);
-  box-shadow: none;
+  box-shadow: 0 8px 24px rgba(30, 78, 95, 0.06);
 }
 
 .cw-pb-service-card:focus-visible {
-  outline: 2px solid var(--petroleo);
-  outline-offset: 2px;
+  outline: 3px solid rgba(30, 78, 95, 0.22);
+  outline-offset: 3px;
 }
 
 .cw-pb-service-card.selected {
-  background: var(--verde-claro);
-  border-color: var(--salvia);
-  border-width: 2px;
+  background: linear-gradient(145deg, #f2f7f0 0%, #e9f1e7 100%);
+  border: 1.5px solid var(--verde-oscuro);
+  box-shadow: 0 10px 28px rgba(111, 134, 107, 0.16);
 }
 
 .cw-pb-service-card.skeleton {
-  height: 84px;
+  min-height: 310px;
   background: linear-gradient(90deg, rgba(228, 214, 190, 0.25) 25%, rgba(228, 214, 190, 0.45) 37%, rgba(228, 214, 190, 0.25) 63%);
   background-size: 400% 100%;
   animation: cw-pb-shimmer 1.4s ease infinite;
   border-color: transparent;
   cursor: default;
+}
+
+@media (max-width: 767.98px) {
+  .cw-pb-service-card.skeleton {
+    min-height: 140px;
+  }
 }
 
 @keyframes cw-pb-shimmer {
@@ -1281,33 +1357,56 @@ body {
   }
 }
 
-.cw-pb-service-icon {
+/* Fila superior: ícono + badge de estado (solo si esta seleccionada). */
+.cw-pb-service-top-row {
   display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cw-pb-service-status {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(111, 134, 107, 0.14);
+  color: var(--petroleo);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cw-pb-service-icon {
+  display: grid;
+  place-items: center;
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  background: rgba(228, 214, 190, 0.4);
-  color: var(--salvia);
+  background: var(--verde-claro);
+  color: var(--verde-oscuro);
   flex-shrink: 0;
 }
 
 .cw-pb-service-icon.cw-pb-icon-bg-pilates {
   background: var(--verde-claro);
+  color: var(--verde-oscuro);
 }
 
 .cw-pb-service-icon.cw-pb-icon-bg-fisio {
   background: rgba(228, 214, 190, 0.55);
+  color: #a87542;
 }
 
 .cw-pb-service-icon.cw-pb-icon-bg-grupal {
   background: rgba(30, 78, 95, 0.08);
+  color: var(--petroleo);
 }
 
 .cw-pb-service-icon img {
-  width: 48px;
-  height: 48px;
+  width: 34px;
+  height: 34px;
   object-fit: contain;
   background: transparent;
 }
@@ -1315,138 +1414,112 @@ body {
 .cw-pb-service-body {
   display: flex;
   flex-direction: column;
-  gap: 6px;
   min-width: 0;
 }
 
 .cw-pb-service-name {
+  margin-top: 16px;
   font-family: var(--font-display-serif), serif;
-  font-size: 20px;
+  font-size: clamp(1.35rem, 2vw, 1.65rem);
+  line-height: 1.15;
+  font-weight: 500;
   color: var(--petroleo);
 }
 
-/* #5c6b73 en vez de --muted (#7c8c95): a 13px, --muted da un contraste
-   de ~3.5:1 sobre blanco, por debajo del 4.5:1 que pide WCAG AA para
-   texto normal. Con el nuevo tono el contraste sube a ~5.5:1. */
+/* Pill de duracion. #405550 sobre #EEF2EF da contraste AA de sobra --
+   ambos son literales del mockup, no hacia falta oscurecerlos como al
+   badge de mas abajo. */
 .cw-pb-service-meta {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  width: fit-content;
   gap: 6px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #5c6b73;
+  margin-top: 12px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #eef2ef;
+  color: #405550;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .cw-pb-service-badge {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--petroleo);
-  background: rgba(143, 169, 140, 0.14);
-  border-radius: 999px;
-  padding: 3px 10px;
+  display: inline-flex;
   width: fit-content;
+  margin-top: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #e7f0ec;
+  color: var(--petroleo);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .cw-pb-service-desc {
+  margin-top: 14px;
   font-family: var(--font-body), sans-serif;
-  font-size: 15px;
+  font-size: 0.98rem;
   line-height: 1.5;
+  /* #66736d en vez de --muted (#7c8c95): a este tamaño --muted da ~3.5:1
+     de contraste sobre blanco, por debajo del 4.5:1 que pide WCAG AA. */
   color: #66736d;
 }
 
-.cw-pb-service-indicator {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
+/* Accion siempre al fondo, alineada entre tarjetas con descripciones de
+   distinto largo. Es un span decorativo (aria-hidden) dentro del mismo
+   <button role="radio"> que ya maneja la seleccion -- no es un segundo
+   control ni un segundo evento. */
+.cw-pb-service-action {
+  margin-top: auto;
+  padding-top: 20px;
 }
 
-.cw-pb-service-radio {
-  display: flex;
+.cw-pb-service-button {
+  width: 100%;
+  min-height: 46px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(190, 183, 170, 0.7);
-  color: var(--verde-claro);
-  flex-shrink: 0;
+  gap: 6px;
+  border: 1.5px solid var(--petroleo);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--petroleo);
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 180ms ease, color 180ms ease;
 }
 
-.cw-pb-service-card.selected .cw-pb-service-radio {
-  background: var(--salvia);
-  border-color: var(--salvia);
-  color: white;
+.cw-pb-service-card:hover .cw-pb-service-button {
+  background: var(--petroleo);
+  color: #ffffff;
 }
 
-.cw-pb-service-select-label {
-  display: none;
+/* Relleno en petroleo (no verde-oscuro) tambien en el estado
+   seleccionado: blanco sobre verde-oscuro da ~4:1, por debajo del 4.5:1
+   AA -- petroleo ya es el tono probado en el resto de la app para texto
+   blanco. La distincion de "seleccionada" ya la da el fondo/borde verde
+   de la tarjeta y el badge de arriba. */
+.cw-pb-service-card.selected .cw-pb-service-button {
+  border-color: var(--petroleo);
+  background: var(--petroleo);
+  color: #ffffff;
 }
 
-@media (min-width: 640px) {
-  .cw-pb-service-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-  }
+.cw-pb-service-arrow {
+  transition: transform 180ms ease;
+}
 
-  .cw-pb-service-card {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 20px 18px;
-  }
+.cw-pb-service-card:hover .cw-pb-service-arrow {
+  transform: translateX(3px);
+}
 
-  .cw-pb-service-body {
-    gap: 8px;
-  }
-
-  .cw-pb-service-icon {
-    width: 80px;
-    height: 80px;
-  }
-
-  .cw-pb-service-icon img {
-    width: 54px;
-    height: 54px;
-  }
-
-  .cw-pb-service-name {
-    font-size: 22px;
-  }
-
-  /* En escritorio el indicador se ancla a la esquina superior derecha, no
-     ocupa una columna propia -- así la tarjeta apila ícono/texto normal. */
-  .cw-pb-service-indicator {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-  }
-
-  .cw-pb-service-select-label {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #5c6b73;
-  }
-
-  .cw-pb-service-card.selected .cw-pb-service-select-label {
-    color: var(--petroleo);
-    font-weight: 700;
-  }
-
+@media (prefers-reduced-motion: reduce) {
+  .cw-pb-service-card,
+  .cw-pb-service-button,
   .cw-pb-service-arrow {
-    transition: transform 180ms ease;
-  }
-
-  .cw-pb-service-card:hover .cw-pb-service-arrow {
-    transform: translateX(3px);
+    transition: none;
   }
 }
 
@@ -1455,10 +1528,10 @@ body {
   align-items: center;
   gap: 8px;
   margin-top: 16px;
-  padding: 10px 14px;
+  padding: 12px 16px;
   background: rgba(143, 169, 140, 0.08);
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 14px;
   color: #66736d;
 }
 
@@ -1702,10 +1775,11 @@ body {
 .cw-pb-summary.mobile-inline {
   display: block;
   margin-top: 8px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.94);
   border: 1px solid var(--border-soft);
-  border-radius: 20px;
-  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(30, 78, 95, 0.06);
+  padding: 26px;
 }
 
 @media (min-width: 1024px) {
@@ -1713,10 +1787,11 @@ body {
     display: block;
     position: sticky;
     top: 24px;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.94);
     border: 1px solid var(--border-soft);
-    border-radius: 20px;
-    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(30, 78, 95, 0.06);
+    padding: 26px;
   }
 
   .cw-pb-summary.mobile-inline {
@@ -1856,7 +1931,7 @@ body {
   justify-content: center;
   gap: 8px;
   border: none;
-  border-radius: 14px;
+  border-radius: 10px;
   background: var(--petroleo);
   color: white;
   font-size: 14px;
