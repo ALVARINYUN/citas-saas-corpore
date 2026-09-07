@@ -53,14 +53,30 @@ export async function DELETE(
   const owned = await assertOwnership(id, session.businessId);
   if (!owned) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
 
+  const force = req.nextUrl.searchParams.get("force") === "true";
+
+  // Borrado forzado: el usuario ya vio cuantas citas se van a perder (el
+  // conteo se lo dimos en el 409 de abajo) y confirmo explicitamente que
+  // quiere borrarlas junto con el staff. Transaccion para que no quede el
+  // staff a medio borrar si algo falla.
+  if (force) {
+    await prisma.$transaction([
+      prisma.appointment.deleteMany({ where: { staffId: id } }),
+      prisma.staff.delete({ where: { id } }),
+    ]);
+    return NextResponse.json({ success: true });
+  }
+
   try {
     await prisma.staff.delete({ where: { id } });
   } catch (error) {
     if (isForeignKeyRestrictError(error)) {
+      const appointmentCount = await prisma.appointment.count({ where: { staffId: id } });
       return NextResponse.json(
         {
           error:
             "No se puede eliminar: tiene citas asociadas. Desactívalo en su lugar para dejar de ofrecerlo sin perder el historial.",
+          appointmentCount,
         },
         { status: 409 }
       );

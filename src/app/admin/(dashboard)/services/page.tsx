@@ -63,13 +63,36 @@ export default function ServicesAdminPage() {
   async function handleDelete(id: string) {
     if (!confirm("¿Eliminar este servicio?")) return;
     setDeleteError("");
+
     const res = await fetch(`/api/admin/services/${id}`, { method: "DELETE" });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setDeleteError(data.error ?? "No se pudo eliminar el servicio");
+    if (res.ok) {
+      load();
       return;
     }
-    load();
+
+    const data = await res.json().catch(() => ({}));
+
+    // 409 con appointmentCount: el servicio tiene citas, pero el usuario
+    // puede forzar el borrado (se lleva las citas con él) tras confirmar
+    // explícitamente viendo cuántas son.
+    if (res.status === 409 && typeof data.appointmentCount === "number") {
+      const n = data.appointmentCount;
+      const wantsForce = confirm(
+        `Este servicio tiene ${n} ${n === 1 ? "cita asociada" : "citas asociadas"}. Si lo eliminas definitivamente, también se borrará ese historial de citas y no se puede deshacer. ¿Quieres eliminarlo de todas formas?`
+      );
+      if (!wantsForce) return;
+
+      const forceRes = await fetch(`/api/admin/services/${id}?force=true`, { method: "DELETE" });
+      if (!forceRes.ok) {
+        const forceData = await forceRes.json().catch(() => ({}));
+        setDeleteError(forceData.error ?? "No se pudo eliminar el servicio");
+        return;
+      }
+      load();
+      return;
+    }
+
+    setDeleteError(data.error ?? "No se pudo eliminar el servicio");
   }
 
   return (
