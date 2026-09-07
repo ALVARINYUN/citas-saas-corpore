@@ -208,10 +208,33 @@ export default function BookingPage() {
     };
   }, [business, selectedService, selectedDate, slug]);
 
+  // Scroll suave hacia una sección ya presente en el DOM, respetando
+  // prefers-reduced-motion (scroll instantáneo en vez de animado). El
+  // setTimeout (no requestAnimationFrame) es deliberado: mover el foco no
+  // depende de sincronizarse con un frame de pintado, y rAF puede no
+  // dispararse si la pestaña no está realmente compuesta en pantalla.
+  function scrollToHeading(ref: React.RefObject<HTMLHeadingElement | null>) {
+    const behavior: ScrollBehavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? "auto"
+      : "smooth";
+    setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior, block: "start" });
+      // preventScroll: enfocar un elemento dispara el scroll-into-view
+      // propio del navegador (instantáneo), que si no se evita interrumpe
+      // a mitad de camino la animación "smooth" recién iniciada arriba.
+      ref.current?.focus({ preventScroll: true });
+    }, 0);
+  }
+
   function handleSelectService(s: Service) {
     if (selectedSlot) setClearedNotice("Cambiaste de servicio, elige un horario de nuevo.");
     setSelectedService(s);
     setSelectedSlot(null);
+    // Si la sección "2. Fecha y hora" ya está en el DOM (el usuario vuelve a
+    // elegir servicio estando en el paso 2 o 3), guiarlo de nuevo hacia
+    // ella -- si todavía está en el paso 1, el propio botón "Continuar" ya
+    // se encarga del scroll al avanzar.
+    if (currentStep >= 2) scrollToHeading(step2HeadingRef);
   }
 
   function handleSelectDate(dateKey: string) {
@@ -223,6 +246,10 @@ export default function BookingPage() {
   function handleSelectSlot(slot: Slot) {
     setClearedNotice(null);
     setSelectedSlot(slot);
+    // Mismo criterio que handleSelectService: si "3. Confirmación" ya está
+    // visible (el usuario cambia de horario estando en el paso 3), llevarlo
+    // de nuevo hacia el formulario.
+    if (currentStep >= 3) scrollToHeading(step3HeadingRef);
   }
 
   function handleChangeSelection() {
@@ -264,23 +291,13 @@ export default function BookingPage() {
     if (currentStep === 1) {
       if (!selectedService) return;
       setCurrentStep(2);
-      // setTimeout (no requestAnimationFrame): mover el foco al encabezado
-      // del paso nuevo no depende de sincronizarse con un frame de pintado,
-      // y rAF puede no dispararse en absoluto si la pestaña no está
-      // realmente compuesta en pantalla en ese instante.
-      setTimeout(() => {
-        step2HeadingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-        step2HeadingRef.current?.focus();
-      }, 0);
+      scrollToHeading(step2HeadingRef);
       return;
     }
     if (currentStep === 2) {
       if (!selectedSlot) return;
       setCurrentStep(3);
-      setTimeout(() => {
-        step3HeadingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-        step3HeadingRef.current?.focus();
-      }, 0);
+      scrollToHeading(step3HeadingRef);
       return;
     }
     await handleConfirm();
