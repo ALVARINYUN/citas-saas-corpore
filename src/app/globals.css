@@ -2718,6 +2718,28 @@ body {
   margin-top: 14px;
 }
 
+.cw-pb-confirm-restart {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 14px;
+  background: var(--petroleo);
+  color: white;
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 180ms ease;
+}
+
+.cw-pb-confirm-restart:hover {
+  background: #163b47;
+}
+
 /* ---------- Accesibilidad transversal ---------- */
 
 .cw-pb-page button:focus-visible {

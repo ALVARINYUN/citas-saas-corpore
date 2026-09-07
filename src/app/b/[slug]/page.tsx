@@ -256,6 +256,28 @@ export default function BookingPage() {
     setCurrentStep(currentStep === 3 ? 2 : 1);
   }
 
+  // Reinicia todo el flujo desde la pantalla de éxito -- vuelve exactamente
+  // a los valores iniciales de cada estado (los mismos que al cargar la
+  // página por primera vez), sin recargar business/services.
+  function handleStartOver() {
+    setSelectedService(null);
+    const now = new Date();
+    setViewedMonth({ year: now.getFullYear(), month: now.getMonth() + 1 });
+    setAvailableDates(new Set());
+    setDaysLoading(false);
+    setSelectedDate(null);
+    setSlots([]);
+    setSlotsState("idle");
+    setSelectedSlot(null);
+    setAmPmTab("morning");
+    setClearedNotice(null);
+    setCurrentStep(1);
+    setForm({ name: "", email: "", phone: "" });
+    setSubmitting(false);
+    setSubmitError("");
+    setConfirmed(false);
+  }
+
   function goToStep(n: number) {
     if (n < currentStep) setCurrentStep(n as 1 | 2 | 3);
   }
@@ -355,6 +377,9 @@ export default function BookingPage() {
             <p className="cw-pb-confirm-note">
               Te enviamos la confirmación por WhatsApp al {form.phone || "el número que nos diste"}.
             </p>
+            <button type="button" onClick={handleStartOver} className="cw-pb-confirm-restart">
+              Agendar otra cita
+            </button>
           </div>
         </div>
       </main>
