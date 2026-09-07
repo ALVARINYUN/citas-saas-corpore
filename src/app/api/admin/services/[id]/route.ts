@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSession, isSession } from "@/lib/requireSession";
+import { isForeignKeyRestrictError } from "@/lib/prismaErrors";
 
 async function assertOwnership(serviceId: string, businessId: string) {
   const service = await prisma.service.findUnique({ where: { id: serviceId } });
@@ -44,6 +45,19 @@ export async function DELETE(
   const owned = await assertOwnership(id, session.businessId);
   if (!owned) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
 
-  await prisma.service.delete({ where: { id } });
+  try {
+    await prisma.service.delete({ where: { id } });
+  } catch (error) {
+    if (isForeignKeyRestrictError(error)) {
+      return NextResponse.json(
+        {
+          error:
+            "No se puede eliminar: tiene citas asociadas. Desactívalo en su lugar para dejar de ofrecerlo sin perder el historial.",
+        },
+        { status: 409 }
+      );
+    }
+    throw error;
+  }
   return NextResponse.json({ success: true });
 }

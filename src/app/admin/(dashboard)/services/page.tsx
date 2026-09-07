@@ -17,6 +17,7 @@ export default function ServicesAdminPage() {
   const [form, setForm] = useState({ name: "", durationMin: "30", price: "", capacity: "1" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
 
   function load() {
     setLoading(true);
@@ -61,7 +62,13 @@ export default function ServicesAdminPage() {
 
   async function handleDelete(id: string) {
     if (!confirm("¿Eliminar este servicio?")) return;
-    await fetch(`/api/admin/services/${id}`, { method: "DELETE" });
+    setDeleteError("");
+    const res = await fetch(`/api/admin/services/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setDeleteError(data.error ?? "No se pudo eliminar el servicio");
+      return;
+    }
     load();
   }
 
@@ -115,6 +122,12 @@ export default function ServicesAdminPage() {
           + {saving ? "Agregando..." : "Agregar servicio"}
         </button>
       </form>
+
+      {deleteError && (
+        <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 12 }} role="alert">
+          {deleteError}
+        </p>
+      )}
 
       {loading && <p style={{ color: "var(--muted)", fontSize: 14 }}>Cargando...</p>}
 

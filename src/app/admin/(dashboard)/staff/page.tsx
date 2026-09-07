@@ -30,6 +30,7 @@ export default function StaffAdminPage() {
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   function load() {
     setLoading(true);
@@ -60,7 +61,22 @@ export default function StaffAdminPage() {
 
   async function handleDeleteStaff(id: string) {
     if (!confirm("¿Eliminar este miembro del staff?")) return;
-    await fetch(`/api/admin/staff/${id}`, { method: "DELETE" });
+    setDeleteError("");
+    const res = await fetch(`/api/admin/staff/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setDeleteError(data.error ?? "No se pudo eliminar el miembro del staff");
+      return;
+    }
+    load();
+  }
+
+  async function toggleStaffActive(member: StaffMember) {
+    await fetch(`/api/admin/staff/${member.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active: !member.active }),
+    });
     load();
   }
 
@@ -110,6 +126,12 @@ export default function StaffAdminPage() {
         </button>
       </form>
 
+      {deleteError && (
+        <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 12 }} role="alert">
+          {deleteError}
+        </p>
+      )}
+
       {loading && <p style={{ color: "var(--muted)", fontSize: 14 }}>Cargando...</p>}
 
       <div style={{ display: "grid", gap: 12 }}>
@@ -120,7 +142,8 @@ export default function StaffAdminPage() {
                 onClick={() => setExpandedId(expandedId === member.id ? null : member.id)}
                 style={{
                   fontWeight: 500,
-                  color: "var(--grafito)",
+                  color: member.active ? "var(--grafito)" : "var(--muted)",
+                  textDecoration: member.active ? "none" : "line-through",
                   background: "none",
                   border: 0,
                   cursor: "pointer",
@@ -129,9 +152,14 @@ export default function StaffAdminPage() {
               >
                 {member.name} {expandedId === member.id ? "▲" : "▼"}
               </button>
-              <button onClick={() => handleDeleteStaff(member.id)} className="cw-link-danger" style={{ background: "none", border: 0 }}>
-                Eliminar
-              </button>
+              <div style={{ display: "flex", gap: 12 }}>
+                <button onClick={() => toggleStaffActive(member)} className="cw-link" style={{ background: "none", border: 0 }}>
+                  {member.active ? "Desactivar" : "Activar"}
+                </button>
+                <button onClick={() => handleDeleteStaff(member.id)} className="cw-link-danger" style={{ background: "none", border: 0 }}>
+                  Eliminar
+                </button>
+              </div>
             </div>
 
             {expandedId === member.id && (
