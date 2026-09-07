@@ -104,17 +104,19 @@ export default function BusinessSettingsPage() {
 
   return (
     <div className="admin-content">
-      <h1 className="admin-page-title">{business?.name}</h1>
-      <p className="admin-page-subtitle">Configura la información que verán tus clientes.</p>
-      <svg className="admin-title-mark" viewBox="0 0 220 60" fill="none" aria-hidden="true">
-        <path
-          d="M10 40 C48 3, 76 6, 106 31 C138 57, 171 53, 207 22"
-          stroke="var(--salvia)"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-        <circle cx="166" cy="25" r="8" fill="var(--salvia)" />
-      </svg>
+      <div className="admin-brand">
+        <svg className="admin-brand-symbol" viewBox="0 0 220 60" fill="none" aria-hidden="true">
+          <path
+            d="M10 40 C48 3, 76 6, 106 31 C138 57, 171 53, 207 22"
+            stroke="#6F866B"
+            strokeWidth="3.4"
+            strokeLinecap="round"
+          />
+          <circle cx="166" cy="25" r="7" fill="#6F866B" />
+        </svg>
+        <h1 className="admin-brand-name">{business?.name}</h1>
+        <p className="admin-page-subtitle">Configura la información que verán tus clientes.</p>
+      </div>
 
       <div className="business-settings-card">
         <section className="identity-section">
