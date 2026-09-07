@@ -142,45 +142,52 @@ export default function BookingCalendar({
   const monthLabel = `${MONTH_LABELS[month - 1]} ${year}`;
 
   return (
-    <div className="cw-pb-calendar">
-      <div className="cw-pb-calendar-header">
+    <div className="booking-calendar-card">
+      <div className="booking-calendar-header">
         <button
           type="button"
           onClick={() => changeMonth(-1)}
           disabled={!canGoPrev}
           aria-label="Mes anterior"
-          className="cw-pb-calendar-nav"
+          className="booking-calendar-arrow"
         >
-          <ChevronLeft size={18} aria-hidden="true" />
+          <ChevronLeft size={20} aria-hidden="true" />
         </button>
-        <span className="cw-pb-calendar-month" aria-live="polite">
+        <span className="booking-calendar-month" aria-live="polite">
           {monthLabel}
         </span>
         <button
           type="button"
           onClick={() => changeMonth(1)}
           aria-label="Mes siguiente"
-          className="cw-pb-calendar-nav"
+          className="booking-calendar-arrow"
         >
-          <ChevronRight size={18} aria-hidden="true" />
+          <ChevronRight size={20} aria-hidden="true" />
         </button>
       </div>
 
-      <div className="cw-pb-calendar-dow" aria-hidden="true">
+      <div className="booking-calendar-weekdays" aria-hidden="true">
         {WEEKDAY_LABELS.map((d) => (
-          <span key={d}>{d}</span>
+          <span key={d} className="booking-calendar-weekday">
+            {d}
+          </span>
         ))}
       </div>
 
-      <div className="cw-pb-calendar-grid">
+      <div className="booking-calendar-grid">
         {cells.map((cell) => {
           if (!cell.inMonth) {
-            return <span key={cell.key} className="cw-pb-calendar-day outside" aria-hidden="true" />;
+            return <span key={cell.key} className="booking-calendar-day is-outside" aria-hidden="true" />;
           }
 
           const selectable = isSelectable(cell);
           const selected = cell.key === selectedDate;
           const isToday = cell.key === todayKey;
+          // "Destacado" (borde salvia) es el día de hoy cuando todavía se
+          // puede reservar y no es el elegido -- no es un estado nuevo, es
+          // la misma condición que antes coloreaba .today, solo con el
+          // estilo visual que pide la referencia.
+          const highlight = isToday && selectable && !selected;
 
           return (
             <button
@@ -196,7 +203,7 @@ export default function BookingCalendar({
               tabIndex={cell.key === rovingKey ? 0 : -1}
               onKeyDown={(e) => handleKeyDown(e, cell)}
               onClick={() => selectable && onSelectDate(cell.key)}
-              className={`cw-pb-calendar-day ${selected ? "selected" : ""} ${isToday ? "today" : ""} ${!selectable ? "unavailable" : ""}`}
+              className={`booking-calendar-day ${selected ? "is-selected" : ""} ${highlight ? "is-available-highlight" : ""} ${!selectable ? "is-disabled" : ""}`}
             >
               {cell.day}
             </button>

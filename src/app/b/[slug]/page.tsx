@@ -536,8 +536,13 @@ export default function BookingPage() {
 
             {/* PASO 2: FECHA Y HORA */}
             {currentStep >= 2 && selectedService && (
-              <section className="cw-pb-section" aria-labelledby="step2-heading">
-                <h2 id="step2-heading" className="cw-pb-section-title" tabIndex={-1} ref={step2HeadingRef}>
+              <section className="cw-pb-section booking-datetime-section" aria-labelledby="step2-heading">
+                <h2
+                  id="step2-heading"
+                  className="cw-pb-section-title booking-datetime-title"
+                  tabIndex={-1}
+                  ref={step2HeadingRef}
+                >
                   2. Fecha y hora
                 </h2>
 
@@ -556,37 +561,39 @@ export default function BookingPage() {
                 )}
 
                 {selectedDate && (
-                  <div className="cw-pb-times-block">
-                    <div
-                      className="cw-pb-tabs"
-                      role="tablist"
-                      aria-label="Franja horaria"
-                      onKeyDown={handleTabKeyDown}
-                    >
-                      <button
-                        ref={morningTabRef}
-                        role="tab"
-                        id="tab-morning"
-                        aria-selected={amPmTab === "morning"}
-                        aria-controls="slots-panel"
-                        tabIndex={amPmTab === "morning" ? 0 : -1}
-                        onClick={() => setAmPmTab("morning")}
-                        className={`cw-pb-tab ${amPmTab === "morning" ? "active" : ""}`}
+                  <div>
+                    <div className="booking-period-wrapper">
+                      <div
+                        className="booking-period-toggle"
+                        role="tablist"
+                        aria-label="Franja horaria"
+                        onKeyDown={handleTabKeyDown}
                       >
-                        Mañana
-                      </button>
-                      <button
-                        ref={afternoonTabRef}
-                        role="tab"
-                        id="tab-afternoon"
-                        aria-selected={amPmTab === "afternoon"}
-                        aria-controls="slots-panel"
-                        tabIndex={amPmTab === "afternoon" ? 0 : -1}
-                        onClick={() => setAmPmTab("afternoon")}
-                        className={`cw-pb-tab ${amPmTab === "afternoon" ? "active" : ""}`}
-                      >
-                        Tarde
-                      </button>
+                        <button
+                          ref={morningTabRef}
+                          role="tab"
+                          id="tab-morning"
+                          aria-selected={amPmTab === "morning"}
+                          aria-controls="slots-panel"
+                          tabIndex={amPmTab === "morning" ? 0 : -1}
+                          onClick={() => setAmPmTab("morning")}
+                          className={`booking-period-option ${amPmTab === "morning" ? "is-active" : ""}`}
+                        >
+                          Mañana
+                        </button>
+                        <button
+                          ref={afternoonTabRef}
+                          role="tab"
+                          id="tab-afternoon"
+                          aria-selected={amPmTab === "afternoon"}
+                          aria-controls="slots-panel"
+                          tabIndex={amPmTab === "afternoon" ? 0 : -1}
+                          onClick={() => setAmPmTab("afternoon")}
+                          className={`booking-period-option ${amPmTab === "afternoon" ? "is-active" : ""}`}
+                        >
+                          Tarde
+                        </button>
+                      </div>
                     </div>
 
                     <div
@@ -615,7 +622,7 @@ export default function BookingPage() {
                       )}
 
                       {visibleSlots.length > 0 && (
-                        <div className="cw-pb-slot-grid">
+                        <div className="booking-time-grid">
                           {visibleSlots.map((slot) => {
                             const active =
                               selectedSlot?.start === slot.start && selectedSlot?.staffId === slot.staffId;
@@ -627,11 +634,21 @@ export default function BookingPage() {
                                 disabled={slot.isFull}
                                 aria-pressed={active}
                                 onClick={() => handleSelectSlot(slot)}
-                                className={`cw-pb-slot ${active ? "active" : ""} ${slot.isFull ? "full" : ""}`}
+                                className={`booking-time-card ${active ? "is-selected" : ""} ${slot.isFull ? "is-full" : ""}`}
                               >
-                                <span className="cw-pb-slot-time">{label}</span>
-                                <span className="cw-pb-slot-staff">
-                                  <UsersRound size={11} aria-hidden="true" /> {slot.staffName}
+                                <span className="booking-time-card__time">
+                                  <Clock3 className="booking-time-card__clock" aria-hidden="true" />
+                                  {label}
+                                </span>
+                                <span className="booking-time-card__divider" aria-hidden="true" />
+                                <span className="booking-time-card__professional">
+                                  <span className="booking-time-card__avatar" aria-hidden="true">
+                                    <UsersRound size={18} />
+                                  </span>
+                                  <span className="booking-time-card__professional-copy">
+                                    <span className="booking-time-card__professional-label">Profesional</span>
+                                    <span className="booking-time-card__professional-name">{slot.staffName}</span>
+                                  </span>
                                 </span>
                                 {slot.isFull && <span className="cw-pb-slot-full-label">Cupo lleno</span>}
                               </button>
@@ -641,8 +658,8 @@ export default function BookingPage() {
                       )}
                     </div>
 
-                    <p className="cw-pb-timezone-note">
-                      <Globe2 size={13} aria-hidden="true" /> Zona horaria: {business?.timezone ?? "Colombia"}
+                    <p className="booking-timezone">
+                      <Globe2 aria-hidden="true" /> Zona horaria: {business?.timezone ?? "Colombia"}
                     </p>
                   </div>
                 )}
