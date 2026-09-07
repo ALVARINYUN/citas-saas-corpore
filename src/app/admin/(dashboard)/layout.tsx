@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Globe2 } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import LogoutButton from "./LogoutButton";
@@ -14,20 +14,27 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!business) redirect("/admin/login");
 
   return (
-    <div className="cw-shell">
+    <div className="cw-shell admin-page">
       {/* Barra lateral — solo visible en pantallas >= 768px */}
-      <aside className="cw-sidebar">
+      <aside className="cw-sidebar admin-sidebar">
         <div className="cw-sidebar-brand">{business.name}</div>
         <div className="cw-sidebar-sub">/b/{business.slug}</div>
         <a
           href={`/b/${business.slug}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="cw-preview-link"
+          className="public-page-link"
         >
-          Ver página de reservas <ExternalLink size={12} aria-hidden="true" />
+          <span className="public-page-link-icon" aria-hidden="true">
+            <Globe2 size={18} />
+          </span>
+          <span className="public-page-link-text">
+            <span className="public-page-link-title">Página de reservas</span>
+            <span className="public-page-link-sub">Ver sitio público</span>
+          </span>
+          <ExternalLink size={16} className="public-page-link-arrow" aria-hidden="true" />
         </a>
-        <SidebarNav />
+        <SidebarNav businessName={business.name} />
         <div className="cw-sidebar-footer">
           <LogoutButton />
         </div>
@@ -54,7 +61,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </div>
             <LogoutButton />
           </header>
-          <TopbarNav />
+          <TopbarNav businessName={business.name} />
         </div>
 
         <main className="cw-page-shell">{children}</main>

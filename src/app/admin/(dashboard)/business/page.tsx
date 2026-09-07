@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Image as ImageIcon, Building2 } from "lucide-react";
 
 interface Business {
   id: string;
@@ -102,105 +103,141 @@ export default function BusinessSettingsPage() {
   if (loading) return <p style={{ color: "var(--muted)", fontSize: 14 }}>Cargando...</p>;
 
   return (
-    <div>
-      <h1 className="cw-page-heading">Mi negocio</h1>
+    <div className="admin-content">
+      <h1 className="admin-page-title">{business?.name}</h1>
+      <p className="admin-page-subtitle">Configura la información que verán tus clientes.</p>
+      <svg className="admin-title-mark" viewBox="0 0 220 60" fill="none" aria-hidden="true">
+        <path
+          d="M10 40 C48 3, 76 6, 106 31 C138 57, 171 53, 207 22"
+          stroke="var(--salvia)"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <circle cx="166" cy="25" r="8" fill="var(--salvia)" />
+      </svg>
 
-      <div className="cw-card" style={{ marginBottom: 20 }}>
-        <p style={{ fontSize: 11, fontWeight: 500, color: "var(--muted)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          Logo
-        </p>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          {business?.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={business.logoUrl}
-              alt="Logo"
-              style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", border: "1px solid rgba(190,183,170,0.5)" }}
-            />
-          ) : (
-            <div
-              style={{
-                width: 72,
-                height: 72,
-                borderRadius: "50%",
-                background: "rgba(228,214,190,0.4)",
-                color: "var(--salvia)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 28,
-                fontFamily: "var(--font-display-serif)",
-              }}
-            >
-              {business?.name?.charAt(0).toUpperCase() ?? "?"}
-            </div>
-          )}
+      <div className="business-settings-card">
+        <section className="identity-section">
+          <h2 className="section-heading">
+            <ImageIcon size={18} aria-hidden="true" />
+            Identidad visual
+          </h2>
+          <p className="section-subheading">Logo del negocio</p>
 
-          <div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="cw-btn-primary"
-                style={{ width: "auto", padding: "8px 16px", fontSize: 13 }}
-              >
-                {uploading ? "Subiendo..." : business?.logoUrl ? "Cambiar logo" : "Subir logo"}
-              </button>
-              {business?.logoUrl && (
-                <button
-                  onClick={handleRemoveLogo}
-                  disabled={removingLogo}
-                  className="cw-link-danger"
-                  style={{ background: "none", border: 0, fontSize: 13 }}
-                >
-                  {removingLogo ? "Quitando..." : "Quitar logo"}
-                </button>
+          <div className="logo-upload-area">
+            <div className="logo-preview">
+              {business?.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={business.logoUrl} alt="Logo" />
+              ) : (
+                business?.name?.charAt(0).toUpperCase() ?? "?"
               )}
             </div>
-            <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 6 }}>PNG, JPG o WEBP · máx 2MB</p>
+
+            <div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="logo-upload-button"
+                >
+                  {uploading ? "Subiendo..." : business?.logoUrl ? "Cambiar logo" : "Subir logo"}
+                </button>
+                {business?.logoUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveLogo}
+                    disabled={removingLogo}
+                    className="cw-link-danger"
+                    style={{ background: "none", border: 0, fontSize: 13 }}
+                  >
+                    {removingLogo ? "Quitando..." : "Quitar logo"}
+                  </button>
+                )}
+              </div>
+              <p className="form-help" style={{ marginTop: 8 }}>
+                PNG, JPG o WEBP · máximo 2 MB
+              </p>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+              onChange={handleLogoChange}
+              style={{ display: "none" }}
+            />
           </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/svg+xml"
-            onChange={handleLogoChange}
-            style={{ display: "none" }}
-          />
-        </div>
+        </section>
+
+        <section className="business-info-section">
+          <div className="business-info-header">
+            <h2 className="section-heading" style={{ marginBottom: 0 }}>
+              <Building2 size={18} aria-hidden="true" />
+              Información del negocio
+            </h2>
+          </div>
+
+          <div className="business-info-body">
+            <form onSubmit={handleSave}>
+              {error && (
+                <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 16 }} role="alert">
+                  {error}
+                </p>
+              )}
+
+              <div className="form-field">
+                <label className="form-label" htmlFor="business-name">
+                  Nombre del negocio
+                </label>
+                <input
+                  id="business-name"
+                  className="form-input"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </div>
+
+              <div className="form-field">
+                <label className="form-label" htmlFor="business-address">
+                  Dirección
+                </label>
+                <input
+                  id="business-address"
+                  className="form-input"
+                  placeholder="Escribe la dirección"
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                />
+              </div>
+
+              <div className="form-field">
+                <label className="form-label" htmlFor="business-description">
+                  Descripción breve
+                </label>
+                <textarea
+                  id="business-description"
+                  className="form-textarea"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  rows={3}
+                  aria-describedby="business-description-help"
+                />
+                <span id="business-description-help" className="form-help">
+                  El chatbot de WhatsApp utiliza esta información para responder preguntas generales.
+                </span>
+              </div>
+
+              <div className="save-button-row">
+                <button type="submit" disabled={saving} className="save-button">
+                  {saving ? "Guardando..." : "Guardar cambios"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
       </div>
-
-      <form onSubmit={handleSave} className="cw-card" style={{ display: "grid", gap: 10 }}>
-        <p style={{ fontSize: 11, fontWeight: 500, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          Información del negocio
-        </p>
-
-        {error && <p style={{ color: "#b91c1c", fontSize: 12 }}>{error}</p>}
-
-        <input
-          className="cw-input"
-          placeholder="Nombre del negocio"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
-        <input
-          className="cw-input"
-          placeholder="Dirección"
-          value={form.address}
-          onChange={(e) => setForm({ ...form, address: e.target.value })}
-        />
-        <textarea
-          className="cw-input"
-          placeholder="Descripción breve (el chatbot de WhatsApp la usa para responder preguntas generales)"
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-          rows={3}
-          style={{ resize: "vertical", fontFamily: "var(--font-body)" }}
-        />
-
-        <button type="submit" disabled={saving} className="cw-btn-primary">
-          {saving ? "Guardando..." : "Guardar cambios"}
-        </button>
-      </form>
     </div>
   );
 }

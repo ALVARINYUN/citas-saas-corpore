@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 const LINKS = [
   {
     href: "/admin/business",
-    label: "Mi negocio",
+    // Sin `label` fijo: este item muestra el nombre real del negocio
+    // (prop `businessName`), no un texto fijo -- multi-tenant, cada
+    // negocio ve el suyo.
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
         <path
@@ -59,25 +61,28 @@ const LINKS = [
   },
 ];
 
-export function SidebarNav() {
+export function SidebarNav({ businessName }: { businessName: string }) {
   const pathname = usePathname();
   return (
     <>
-      {LINKS.map((link) => (
-        <a
-          key={link.href}
-          href={link.href}
-          className={`cw-sidebar-link ${pathname?.startsWith(link.href) ? "active" : ""}`}
-        >
-          {link.icon}
-          {link.label}
-        </a>
-      ))}
+      {LINKS.map((link) => {
+        const isActive = pathname?.startsWith(link.href);
+        return (
+          <a
+            key={link.href}
+            href={link.href}
+            className={`cw-sidebar-link admin-nav-item ${isActive ? "active is-active" : ""}`}
+          >
+            {link.icon}
+            {link.label ?? businessName}
+          </a>
+        );
+      })}
     </>
   );
 }
 
-export function TopbarNav() {
+export function TopbarNav({ businessName }: { businessName: string }) {
   const pathname = usePathname();
   return (
     <nav className="cw-admin-nav">
@@ -88,7 +93,7 @@ export function TopbarNav() {
           className={`cw-admin-nav-link ${pathname?.startsWith(link.href) ? "active" : ""}`}
         >
           {link.icon}
-          {link.label}
+          {link.label ?? businessName}
         </a>
       ))}
     </nav>
